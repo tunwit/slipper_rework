@@ -1,0 +1,49 @@
+{
+    "address":{
+        "นนทบุรี":{
+            "adline1":"I AM FOOD Inc",
+            "adline2":"63/34 Leang muang Pakkret Rd., Bangtalad, Pakkret, Nonthaburi 11120 ",
+            "adline3":"TIN 0125562015764"
+        },
+        "รามอินทรา":{
+            "adline1":"I AM FOOD Inc",
+            "adline2":"63/34 1st Soi,Khan Na Yao, Bangkok 10230",
+            "adline3":"TIN 0125562015764"
+        }
+    },
+    "รามอินทรา":"Ramintra",
+    "นนทบุรี":"Pakkret",
+    "payslip":"Pay Slip",
+    "branch":"Branch :",
+    "personnelcode":"Personnel Code :",
+    "name":"Name - Surname :",
+    "position":"Position :",
+    "paymentdate":"Payment Date :",
+    "earnings":"Earnings",
+    "deduction":"Deduction",
+    "salary":"Salary :",
+    "positionallowance":"Position Allowance :",
+    "otd":"OT (Days) :",
+    "oth":"OT (Hours) :",
+    "diligenceallowance":"Diligence Allowance :",
+    "welfare":"Welfare :",
+    "incentive":"Incentive :",
+    "bonus":"Bonus :",
+    "totale":"Total Earnings :",
+    "totled":"Total Deductions :",
+    "net":"Net Income :",
+    "advance":"Salary Advance :",
+    "social":"Social Security Fund :",
+    "repayment":"Repayment :",
+    "leave":"Leave :",
+    "ofmonth":"{month} {year+543}",
+    "debt":"Debt :",
+    "loan":"Loan :",
+    "details":"Details",
+    "absent":"Absent :",
+    "late":"Late :",
+    "sick":"Sick Leave :",
+    "personal":"Personal Leave :",
+    "vacation":"Vacation Leave :",
+    "warning":"Salary and wage are confidential infomation. Disclosure is strictly prohibited. This document is only valid with an autorized signature and company stamp"
+}
