@@ -1,1 +1,3 @@
-print(' '.ljust(5,'1'))
+import os 
+dir_path = os.getcwd()
+print(dir_path)

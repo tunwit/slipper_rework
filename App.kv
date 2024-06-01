@@ -1,0 +1,144 @@
+MDScreen: 
+    MDBoxLayout:   
+        MDNavigationRail:
+            width: "100dp"
+            current_selected_item: 0
+            md_bg_color: 0.217,0.217,0.217,0.1
+            anchor: "center"
+            selected_color_background: "#e7e4c0"
+            text_color_item_active: app.theme_cls.primary_color
+            icon_color_item_active: app.theme_cls.primary_light
+            MDNavigationRailItem:
+                icon: "newspaper-variant-multiple-outline"
+                text: "Slip Maker"
+                on_press : mana.current = "SlipMaker"
+            MDNavigationRailItem:
+                icon: "gmail"
+                text: "Gmail Sender"
+                on_press : mana.current = "GmailSender"
+            MDNavigationRailItem:
+                icon: "account"
+                text: "Employee"
+                on_press : mana.current = "Employee"
+            MDNavigationRailItem:
+                icon: "cog"
+                text: "Setting"
+                on_press : mana.current = "Setting"
+
+        MDScreenManager:
+            id: mana
+            SlipMaker:
+            GmailSender:
+            Employee:
+            Setting:
+        
+<SlipMaker>:
+    name: "SlipMaker"
+    MDBoxLayout:
+        id: box1
+        orientation:"horizontal"
+        MDScreen:
+            MDLabel:
+                text: root.excel_path
+                halign: "center"
+                font_name: "sarabunBold"
+                font_size: "50sp"
+                pos_hint:{"center_y":.6}
+            MDRectangleFlatButton
+                markup:True
+                text: "[b]Browse File[/b]"
+                font_name: "sarabun"
+                font_size: "20sp"
+                pos_hint:{"center_x":.5,"center_y":.5}
+                on_press: root.on_browse()
+        
+<GmailSender>:
+    name : "GmailSender"
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: '20dp'
+        spacing: '5dp'
+        MDBoxLayout:
+            id: box_email
+            size_hint:1,1
+            orientation: "vertical"
+            MDLabel:
+                id: no_employee_label_email
+                text: 'No employee deploy'
+                font_name: "sarabun"
+                font_size: "20sp"
+                theme_text_color:'Hint'
+                halign: 'center'
+
+        MDBoxLayout:
+            spacing: '20dp'
+            size_hint:1,0.15
+            orientation: "vertical"
+            MDSeparator:
+            MDFillRoundFlatIconButton:
+                id: sendemail_button
+                icon: 'email'
+                font_name: "sarabun"
+                font_size: "20sp"
+                text: f' 0       Send email               '
+                pos_hint:{'center_y':0.5,'center_x':0.5}
+                halign: 'center'
+                disabled:True
+                on_press: root.send_email_button()
+
+<Employee>:
+    name : "Employee"
+    MDBoxLayout:
+        orientation: "horizontal"
+        MDBoxLayout:
+            id:box_employee
+            orientation: "vertical"
+            MDLabel:
+                id: no_employee_label
+                text: 'No employee deploy'
+                font_name: "sarabun"
+                font_size: "20sp"
+                halign: 'center'
+                pos_hint:{"center_y":.5}
+                theme_text_color:'Hint'
+                        
+
+        MDBoxLayout:
+            md_bg_color: (0.217,0.217,0.217,0.1)
+            padding: "20dp"
+            spacing: "10dp"
+            orientation: "vertical"
+            size_hint:0.3,1
+            MDScreen:
+                MDIcon:
+                    icon:'account'
+                    pos_hint:{"center_x":.04,"center_y":0.051}
+                MDRaisedButton:
+                    id: delete_button
+                    text: "Delete"
+                    font_name: "sarabun"
+                    font_size: "20sp"
+                    pos_hint:{"center_x":.7,"center_y":0.05}
+                    disabled:True
+                    on_press: root.delete_selected()
+                MDLabel:
+                    id: delete_label_count
+                    text: "0"
+                    font_name: "sarabun"
+                    font_size: "20sp"
+                    pos_hint:{"center_x":.65,"center_y":0.05}
+
+<Setting>:
+    name : "Setting"
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: "40dp"
+        spacing: "10dp"
+        MDBoxLayout:
+            orientation: "horizontal"
+            MDLabel:
+                text:'Langauge'
+                pos_hint:{'center_y':0.5}
+            MDSwitch:
+                halign:
+        MDSeparator:

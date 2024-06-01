@@ -1,14 +1,34 @@
 {
     "address":{
-        "นนทบุรี":{
+        "ตุ๊กแกอวกาศสามัคคี":{
             "adline1":"I AM FOOD Inc",
             "adline2":"63/34 Leang muang Pakkret Rd., Bangtalad, Pakkret, Nonthaburi 11120 ",
             "adline3":"TIN 0125562015764"
         },
-        "รามอินทรา":{
+        "ตุ๊กแกอวกาศรามอินทรา":{
             "adline1":"I AM FOOD Inc",
             "adline2":"63/34 1st Soi,Khan Na Yao, Bangkok 10230",
             "adline3":"TIN 0125562015764"
+        },
+        "Butcher":{
+            "adline1":"บริษัท ไอแอมฟู้ด จำกัด",
+            "adline2":"63/34 ซอย1 แขวง คันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
+            "adline3":"เลขที่ผู้เสียภาษี 0125562015764"
+        },
+        "ครัวกลาง":{
+            "adline1":"บริษัท ไอแอมฟู้ด จำกัด",
+            "adline2":"63/34 ซอย1 แขวง คันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
+            "adline3":"เลขที่ผู้เสียภาษี 0125562015764"
+        },
+        "นนทบุรี":{
+            "adline1":"บริษัท ไอแอมฟู้ด จำกัด",
+            "adline2":"63/34 ถนนเลี่ยงเมืองปากเกร็ด ตำบลบางตลาด อ.ปากเกร็ด เทศบาลนครนนทบุรี  จ.นนทบุรี 11120 ",
+            "adline3":"เลขที่ผู้เสียภาษี 0125562015764"
+        },
+        "รามอินทรา":{
+            "adline1":"บริษัท ไอแอมฟู้ด จำกัด",
+            "adline2":"63/34 ซอย1 แขวง คันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
+            "adline3":"เลขที่ผู้เสียภาษี 0125562015764"
         }
     },
     "รามอินทรา":"Ramintra",
@@ -25,8 +45,10 @@
     "positionallowance":"Position Allowance :",
     "otd":"OT (Days) :",
     "oth":"OT (Hours) :",
+    "otho":"OT (Holidays)",
     "diligenceallowance":"Diligence Allowance :",
     "welfare":"Welfare :",
+    "target":"Target balance",
     "incentive":"Incentive :",
     "bonus":"Bonus :",
     "totale":"Total Earnings :",
@@ -45,5 +67,8 @@
     "sick":"Sick Leave :",
     "personal":"Personal Leave :",
     "vacation":"Vacation Leave :",
-    "warning":"Salary and wage are confidential infomation. Disclosure is strictly prohibited. This document is only valid with an autorized signature and company stamp"
+    "warning":"Salary and wage are confidential infomation. Disclosure is strictly prohibited. This document is only valid with an autorized signature and company stamp",
+    "efficient":"Efficient",
+    "holidays":"Holidays",
+    "totallate":"ขาด/สาย/ลา"
 }
