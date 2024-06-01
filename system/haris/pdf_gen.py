@@ -14,6 +14,7 @@ import openpyxl
 from openpyxl import load_workbook
 import shutil
 from setup_config import SLIP_DETAIL
+
 SHOP_NAME = 'haris'
 creating = False
 
@@ -131,12 +132,12 @@ class excel():
         app.Interactive = False
         app.Visible = False
         index = 0
+
         for sheet in self.sources:
             for i in self.temporary.sheetnames:
                 if i != "สลิป":
                     self.temporary.remove(self.temporary[i])
-            file = []
-            for num,i in enumerate(range(self.get_round(sheet)),1):
+            for i in range(self.get_round(sheet)):
                     sheet_title = sheet.title.replace('D','')
                     i += 3
                     if not self.get_value(sheet,2,i) in people:
@@ -170,8 +171,6 @@ class excel():
                     filename = f"{self.get_value(sheet,2,i)},{self.get_value(sheet,22,i)},0,{date_m.strftime('%B')},{datetime.now().strftime('%d%m%y%H%M%S')}"
                     finalpath_ex = os.path.join(self.output_dir,sheet_title,f"{filename}.xlsx")
                     self.temporary.save(finalpath_ex)
-                    file.append(salib['C6'].value)
-                    time.sleep(0.3)
                     wb = app.Workbooks.Open(finalpath_ex)
                     wb.ActiveSheet.PageSetup.Orientation = 2
                     wb.ActiveSheet.PageSetup.Zoom = False
@@ -180,7 +179,6 @@ class excel():
                     wb.ActiveSheet.ExportAsFixedFormat(0,os.path.join(self.output_dir,sheet_title,f"{filename}"))
                     wb.Save()
                     wb.Close()   
-                    time.sleep(0.1)
                     os.remove(finalpath_ex)
             shutil.copyfile(self.path,self.temporaries)
             self.temporary = load_workbook(self.temporaries,data_only=True)
