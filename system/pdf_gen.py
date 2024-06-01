@@ -13,8 +13,8 @@ from datetime import datetime
 import openpyxl
 from openpyxl import load_workbook
 import shutil
-from setup_config import SLIP_DETAIL
-SHOP_NAME = 'tukkae'
+from setup_config import SLIP_DETAIL, LOGO_PATH, SHOP_NAME
+
 creating = False
 
 month = {
@@ -81,7 +81,7 @@ class excel():
     
     def get_value(self,source,col,i):
         result = source.cell(row=i, column=col).value
-        if result == None:
+        if result == None or result == '0':
             result = "-"
         return result
     
@@ -131,11 +131,12 @@ class excel():
         app.Interactive = False
         app.Visible = False
         index = 0
+
         for sheet in self.sources:
             for i in self.temporary.sheetnames:
                 if i != "สลิป":
                     self.temporary.remove(self.temporary[i])
-            for num,i in enumerate(range(self.get_round(sheet)),1):
+            for i in range(self.get_round(sheet)):
                     sheet_title = sheet.title.replace('D','')
                     i += 3
                     if not self.get_value(sheet,2,i) in people:
@@ -144,12 +145,12 @@ class excel():
                     self.mkdir(sheet_title)
                     self.progress(index,self.get_value(sheet,2,i),sheet_title)
                     respound = self.get_lang(self.get_value(sheet,27,i))
-                    img = openpyxl.drawing.image.Image('data\\image\\tukkea.jpg')
+                    img = openpyxl.drawing.image.Image(LOGO_PATH)
                     img.anchor = 'B1'
                     ws = [i.title for i in self.salib]
                     salib = self.temporary[ws[0]]
                     salib.add_image(img)
-
+                    
                     salib["C1"] = respound["address"][sheet_title]["adline1"]
                     salib["C2"] = respound["address"][sheet_title]["adline2"]
                     salib["C3"] = respound["address"][sheet_title]["adline3"]
@@ -165,8 +166,8 @@ class excel():
                                 salib[value_pos] = self.get_value(sheet,col_pos,i)
                             else:
                                 salib[value_pos] = col_pos
-
-                    filename = f"{self.get_value(sheet,2,i)},{self.get_value(sheet,20,i)},0,{date_m.strftime('%B')},{datetime.now().strftime('%d%m%y%H%M%S')}"
+                    
+                    filename = f"{self.get_value(sheet,2,i)},{self.get_value(sheet,22,i)},0,{date_m.strftime('%B')},{datetime.now().strftime('%d%m%y%H%M%S')}"
                     finalpath_ex = os.path.join(self.output_dir,sheet_title,f"{filename}.xlsx")
                     self.temporary.save(finalpath_ex)
                     wb = app.Workbooks.Open(finalpath_ex)

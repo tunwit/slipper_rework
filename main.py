@@ -39,6 +39,10 @@ import threading
 import json
 import re
 from setup_config import SHOP_ID,SHOP_NAME,TITLE
+from system.send_mail import send_email
+from system.pdf_gen import excel 
+from system.pdf_gen import creating
+
 """
 
 ------------------- shop_id -------------------
@@ -49,19 +53,6 @@ from setup_config import SHOP_ID,SHOP_NAME,TITLE
 -----------------------------------------------
 
 """
-
-if SHOP_ID == "1":
-    from system.haris.send_mail import send_email
-    from system.haris.pdf_gen import excel 
-    from system.haris.pdf_gen import creating
-elif SHOP_ID == "2":
-    from system.tukkae.send_mail import send_email
-    from system.tukkae.pdf_gen import excel 
-    from system.tukkae.pdf_gen import creating
-else:
-    print('Invalid shop Id')
-    sys.exit()
-
 
 excel_object = False
 gmail_interval = None
@@ -302,6 +293,7 @@ class SlipMaker(MDScreen):
                 item.add_widget(check)
                 b = str(branch.title) +'slip'
                 self.ids[b].add_widget(item)
+        print(self.ids)
         scroll.add_widget(mdlst_slip)
         fram1.add_widget(scroll)
         fram1.add_widget(MDSeparator())

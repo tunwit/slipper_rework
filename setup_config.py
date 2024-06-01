@@ -12,12 +12,15 @@ if config['shop_id'] == "1":
     PASSWORD = os.getenv('email_password_haris')
     SHOP_NAME = 'haris'
     TITLE = "Haris Slipper"
+    LOGO_PATH = "data\image\Harislogo.jpg"
     
 elif config['shop_id'] == "2":
     SENDER = os.getenv('sender_email_tukkae')
     PASSWORD = os.getenv('email_password_tukkae')
     SHOP_NAME = 'tukkae'
     TITLE = "Tukkae Slipper"
+    LOGO_PATH = "data\image\Tukkea.jpg"
+
 else:
     print('Invalid shop Id')
     sys.exit()
