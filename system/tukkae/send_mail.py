@@ -1,7 +1,6 @@
 
 import os
 import ssl
-import json
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -12,9 +11,8 @@ import pypdfium2 as pdfium
 from email.utils import formatdate
 import time
 import threading
-from dotenv import load_dotenv
 from datetime import datetime
-
+from setup_config import EMAIL_ATTEMP ,SENDER ,PASSWORD
 
 month = {
         "January":"มกราคม", 
@@ -31,8 +29,6 @@ month = {
         "December":"ธันวาคม"
     }
 
-with open("config.json","r",encoding="utf8") as config:
-            config = json.load(config)
 
 class send_email():
     
@@ -117,21 +113,19 @@ class send_email():
             
             if person['email'] == "-":
                 return
-            sender = os.getenv('sender_email')
-            password = os.getenv('email_password')
             context = ssl.create_default_context()
             with smtplib.SMTP_SSL('smtp.gmail.com',465,context = context) as smtp:
-                smtp.login(sender,password)           
+                smtp.login(SENDER,PASSWORD)           
                 msg = self.msg_test_gen(person)
                 success = False
                 attemp = 0
-                while not success and attemp < config['email_attemps']:
+                while not success and attemp < EMAIL_ATTEMP:
                     attemp += 1
                     try:
-                        smtp.sendmail(os.getenv('sender_email'),person['email'],msg.as_string())
+                        smtp.sendmail(SENDER,person['email'],msg.as_string())
                         success = True
                     except Exception as e:
-                        print(f"Fail to send mail to {person['name']} | {person['email']} trying {attemp}/{config['email_attemps']} due to {e}")
+                        print(f"Fail to send mail to {person['name']} | {person['email']} trying {attemp}/{EMAIL_ATTEMP} due to {e}")
 
                 self.progress(self.index,person['name'],person['branch'])
                 if not success:
@@ -163,7 +157,7 @@ class send_email():
             thread = threading.Thread(target=self.send_emails, args=(person,))
             threads.append(thread)
             thread.start()
-            time.sleep(0.5)
+            time.sleep(0.2)
 
         for thread in threads:
             thread.join()

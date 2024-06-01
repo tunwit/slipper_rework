@@ -23,7 +23,6 @@ from kivymd.uix.progressbar import MDProgressBar
 from kivymd.uix.textfield import MDTextField
 from kivymd.uix.pickers import MDDatePicker
 from kivy.clock import Clock
-from kivymd.theming import ThemeManager
 import os
 import tkinter
 from tkinter import filedialog
@@ -32,24 +31,14 @@ from kivymd.font_definitions import theme_font_styles
 import os
 from kivy.properties import  StringProperty,BooleanProperty,ListProperty
 from kivymd.uix.expansionpanel import MDExpansionPanel, MDExpansionPanelTwoLine
-from tqdm import tqdm
-from tqdm import TqdmWarning
-import openpyxl
-from openpyxl import load_workbook
-import shutil
-from io import BytesIO
 import os
-import time
 from datetime import date
 from datetime import datetime
-import json
 import sys
 import threading
 import json
 import re
-from dateutil.relativedelta import relativedelta
-from dotenv import load_dotenv
-
+from setup_config import SHOP_ID,SHOP_NAME,TITLE
 """
 
 ------------------- shop_id -------------------
@@ -61,24 +50,14 @@ from dotenv import load_dotenv
 
 """
 
-
-with open("config.json","r",encoding="utf8") as config:
-            config = json.load(config)
-
-if config['shop_id'] == "1":
+if SHOP_ID == "1":
     from system.haris.send_mail import send_email
     from system.haris.pdf_gen import excel 
     from system.haris.pdf_gen import creating
-    SHOP_NAME = 'haris'
-    TITLE = "Haris Slipper"
-    load_dotenv('.env.haris')
-elif config['shop_id'] == "2":
+elif SHOP_ID == "2":
     from system.tukkae.send_mail import send_email
     from system.tukkae.pdf_gen import excel 
     from system.tukkae.pdf_gen import creating
-    SHOP_NAME = 'tukkae'
-    TITLE = "Tukkae Slipper"
-    load_dotenv('.env.tukkae')
 else:
     print('Invalid shop Id')
     sys.exit()
@@ -639,7 +618,8 @@ class GmailSender(MDScreen):
     def no_employee_label(self):
         for path in os.listdir(f'slip/{SHOP_NAME}'):
             try:
-                os.rmdir(f'slip/{path}')
+                print(f'slip/{SHOP_NAME}/{path}')
+                os.rmdir(f'slip/{SHOP_NAME}/{path}')
             except:pass
         label = MDLabel(
                 text= 'No employee deploy',
@@ -819,7 +799,7 @@ class Employee(MDScreen):
     def no_employee_label(self):
         for path in os.listdir(f'slip/{SHOP_NAME}'):
             try:
-                os.rmdir(f'slip/{path}')
+                os.rmdir(f'slip/{SHOP_NAME}/{path}')
             except:pass
         label = MDLabel(
                 text= 'No employee deploy',
