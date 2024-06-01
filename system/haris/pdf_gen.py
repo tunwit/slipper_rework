@@ -13,7 +13,7 @@ from datetime import datetime
 import openpyxl
 from openpyxl import load_workbook
 import shutil
-
+from setup_config import SLIP_DETAIL
 SHOP_NAME = 'haris'
 creating = False
 
@@ -156,10 +156,16 @@ class excel():
                     salib["C3"] = respound["address"][sheet_title]["adline3"]
                     salib["C4"] = sheet_title #สาขา
                     salib["B8"] = f"{respound['ofmonth'].format(month=month[date_m.strftime('%B')],year=date_m.year)}"
-                    # (text_pos,value_pos,col_pos)
+                    # "Key":[text_pos,value_pos,col_pos]
 
-                    # salib["B8"] = f"{respound['ofmonth']} {mouth[(date - relativedelta(months=1)).strftime('%B')]} {date.year}"
-
+                    for field in SLIP_DETAIL.items():
+                        key,text_pos ,value_pos ,col_pos = field[0],field[1][0],field[1][1],field[1][2]
+                        salib[text_pos] = respound[key]
+                        if value_pos:
+                            if type(col_pos) == int:
+                                salib[value_pos] = self.get_value(sheet,col_pos,i)
+                            else:
+                                salib[value_pos] = col_pos
                     
                     filename = f"{self.get_value(sheet,2,i)},{self.get_value(sheet,22,i)},0,{date_m.strftime('%B')},{datetime.now().strftime('%d%m%y%H%M%S')}"
                     finalpath_ex = os.path.join(self.output_dir,sheet_title,f"{filename}.xlsx")

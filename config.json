@@ -1,7 +1,7 @@
 {
-    "shop_id":"2",
+    "shop_id":"1",
     "email_attemps":5,
-    "haris_slipdetail":{
+    "haris_slip_details":{
         "branch":["B4",0,0],
         "earnings":["B9",0,0],
         "warning":["A25",0,0],
