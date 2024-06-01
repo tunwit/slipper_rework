@@ -209,7 +209,7 @@ class SlipMaker(MDScreen):
     def all_selected(self,button:MDRaisedButton):
         state = button.active
         for ids in self.ids: 
-            if 'checkbox' in ids:
+            if 'checkbox_maker_' in ids:
                 self.ids[ids].active = state
 
     def create_employee_list(self,dt):
@@ -286,7 +286,7 @@ class SlipMaker(MDScreen):
                 checkbox = MDCheckbox()
                 checkbox.bind(active=self.individual_selected)
                 self.total_individual_checkbox += 1
-                self.ids[f'checkbox{self.excel_object.get_value(branch,3,rows)}'] = checkbox
+                self.ids[f"checkbox_maker_{datetime.now().strftime('%f')}"] = checkbox
                 checkbox.color_active = self.theme_cls.accent_light
                 item.add_widget(face)
                 check.add_widget(checkbox)
@@ -328,6 +328,7 @@ class SlipMaker(MDScreen):
         path = self.file_open()
         if path:
             self.excel_object = excel(path = path)
+            self.going_to_make_slip = []
             try:
                 self.ids.box1.remove_widget(self.ids.fram1)
             except:pass
@@ -595,7 +596,7 @@ class GmailSender(MDScreen):
                     checkbox = MDCheckbox()
                     checkbox.bind(active=self.individual_selected)
                     self.total_individual_checkbox += 1
-                    self.ids[f'checkbox_email_{filename.split(",")[0]}'] = checkbox
+                    self.ids[f"checkbox_email_{datetime.now().strftime('%f')}"] = checkbox
                     checkbox.color_active = self.theme_cls.accent_light
                     item.add_widget(face)
                     check.add_widget(checkbox)
@@ -777,7 +778,7 @@ class Employee(MDScreen):
                         checkbox = MDCheckbox()
                         checkbox.bind(active=self.individual_selected)
                         self.total_individual_checkbox += 1
-                        self.ids[f'checkbox_employee_{filename.split(",")[0]}'] = checkbox
+                        self.ids[f"checkbox_employee_{datetime.now().strftime('%f')}"] = checkbox
                         checkbox.color_active = self.theme_cls.accent_light
                         item.add_widget(face)
                         check.add_widget(checkbox)
