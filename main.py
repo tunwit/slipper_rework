@@ -39,6 +39,10 @@ import threading
 import json
 import re
 from setup_config import SHOP_ID,SHOP_NAME,TITLE
+from system.send_mail import send_email
+from system.pdf_gen import excel 
+from system.pdf_gen import creating
+
 """
 
 ------------------- shop_id -------------------
@@ -49,19 +53,6 @@ from setup_config import SHOP_ID,SHOP_NAME,TITLE
 -----------------------------------------------
 
 """
-
-if SHOP_ID == "1":
-    from system.haris.send_mail import send_email
-    from system.haris.pdf_gen import excel 
-    from system.haris.pdf_gen import creating
-elif SHOP_ID == "2":
-    from system.tukkae.send_mail import send_email
-    from system.tukkae.pdf_gen import excel 
-    from system.tukkae.pdf_gen import creating
-else:
-    print('Invalid shop Id')
-    sys.exit()
-
 
 excel_object = False
 gmail_interval = None
@@ -218,7 +209,7 @@ class SlipMaker(MDScreen):
     def all_selected(self,button:MDRaisedButton):
         state = button.active
         for ids in self.ids: 
-            if 'checkbox' in ids:
+            if 'checkbox_maker_' in ids:
                 self.ids[ids].active = state
 
     def create_employee_list(self,dt):
@@ -295,13 +286,14 @@ class SlipMaker(MDScreen):
                 checkbox = MDCheckbox()
                 checkbox.bind(active=self.individual_selected)
                 self.total_individual_checkbox += 1
-                self.ids[f'checkbox{self.excel_object.get_value(branch,3,rows)}'] = checkbox
+                self.ids[f"checkbox_maker_{datetime.now().strftime('%f')}"] = checkbox
                 checkbox.color_active = self.theme_cls.accent_light
                 item.add_widget(face)
                 check.add_widget(checkbox)
                 item.add_widget(check)
                 b = str(branch.title) +'slip'
                 self.ids[b].add_widget(item)
+        print(self.ids)
         scroll.add_widget(mdlst_slip)
         fram1.add_widget(scroll)
         fram1.add_widget(MDSeparator())
@@ -336,6 +328,7 @@ class SlipMaker(MDScreen):
         path = self.file_open()
         if path:
             self.excel_object = excel(path = path)
+            self.going_to_make_slip = []
             try:
                 self.ids.box1.remove_widget(self.ids.fram1)
             except:pass
@@ -603,7 +596,7 @@ class GmailSender(MDScreen):
                     checkbox = MDCheckbox()
                     checkbox.bind(active=self.individual_selected)
                     self.total_individual_checkbox += 1
-                    self.ids[f'checkbox_email_{filename.split(",")[0]}'] = checkbox
+                    self.ids[f"checkbox_email_{datetime.now().strftime('%f')}"] = checkbox
                     checkbox.color_active = self.theme_cls.accent_light
                     item.add_widget(face)
                     check.add_widget(checkbox)
@@ -785,7 +778,7 @@ class Employee(MDScreen):
                         checkbox = MDCheckbox()
                         checkbox.bind(active=self.individual_selected)
                         self.total_individual_checkbox += 1
-                        self.ids[f'checkbox_employee_{filename.split(",")[0]}'] = checkbox
+                        self.ids[f"checkbox_employee_{datetime.now().strftime('%f')}"] = checkbox
                         checkbox.color_active = self.theme_cls.accent_light
                         item.add_widget(face)
                         check.add_widget(checkbox)

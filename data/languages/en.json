@@ -64,11 +64,12 @@
     "details":"Details",
     "absent":"Absent :",
     "late":"Late :",
+    "late_detail":"Late :",
     "sick":"Sick Leave :",
     "personal":"Personal Leave :",
     "vacation":"Vacation Leave :",
     "warning":"Salary and wage are confidential infomation. Disclosure is strictly prohibited. This document is only valid with an autorized signature and company stamp",
     "efficient":"Efficient",
     "holidays":"Holidays",
-    "totallate":"ขาด/สาย/ลา"
+    "totallate":"Leave/Late/Absent"
 }
