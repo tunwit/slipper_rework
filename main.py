@@ -293,7 +293,6 @@ class SlipMaker(MDScreen):
                 item.add_widget(check)
                 b = str(branch.title) +'slip'
                 self.ids[b].add_widget(item)
-        print(self.ids)
         scroll.add_widget(mdlst_slip)
         fram1.add_widget(scroll)
         fram1.add_widget(MDSeparator())

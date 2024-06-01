@@ -14,6 +14,8 @@ import openpyxl
 from openpyxl import load_workbook
 import shutil
 from setup_config import SLIP_DETAIL, LOGO_PATH, SHOP_NAME
+import tempfile
+import threading
 
 creating = False
 
@@ -37,13 +39,12 @@ class excel():
     def __init__(self,path) -> None:
         self.path = path
         self.output_dir = self.get_output_dir()
-        self.temporaries = self.get_temporaries()
         self.sources = self.get_sources()["sources"]
         self.salib = self.get_sources()["salib"]
-        self.temporary=self.get_sources()["temporary"]
         self.people = None
         self.call_back = None
         self.complete = False
+        self.index = 0
 
     def get_output_dir(self):
         output = f"{os.getcwd()}\slip\{SHOP_NAME}"
@@ -60,14 +61,12 @@ class excel():
         return temporaries
     
     def get_sources(self):
-        shutil.copyfile(self.path,self.temporaries)
-        temporary = load_workbook(self.temporaries,data_only=True)
-        salib = [i for i in temporary if "สลิป" in i.title and "Data" not in i.title]
-        sources = [ i for i in temporary if i.title.startswith('D') and "Data" not in i.title]
+        data = load_workbook(self.path,data_only=True)
+        salib = [i for i in data if "สลิป" in i.title and "Data" not in i.title]
+        sources = [ i for i in data if i.title.startswith('D') and "Data" not in i.title]
         return {
             "sources":sources,
-            "salib":salib,
-            "temporary":temporary
+            "salib":salib
             }
     
     def get_lang(self,lang):
@@ -117,6 +116,55 @@ class excel():
                 data.update({'branch':branch})
             self.call_back(data)
 
+    def proceed(self,sheet,i,date_m):
+        with tempfile.NamedTemporaryFile(suffix=".xlsx",delete=False) as temp_excel :
+            print(temp_excel.name)
+            shutil.copyfile(self.path,temp_excel.name)
+            copy = load_workbook(temp_excel)
+            sheet_title = sheet.title.replace('D','')
+            self.index += 1
+            self.mkdir(sheet_title)
+            self.progress(self.index,self.get_value(sheet,2,i),sheet_title)
+            respound = self.get_lang(self.get_value(sheet,27,i))
+            img = openpyxl.drawing.image.Image(LOGO_PATH)
+            img.anchor = 'B1'
+            salib = copy['สลิป']
+
+            for sheetname in copy.sheetnames: # delete all unnecessary sheet EXCEPT Slip
+                if 'สลิป' not in sheetname:
+                    copy.remove(copy[sheetname])
+
+            salib.add_image(img)
+            salib["C1"] = respound["address"][sheet_title]["adline1"]
+            salib["C2"] = respound["address"][sheet_title]["adline2"]
+            salib["C3"] = respound["address"][sheet_title]["adline3"]
+            salib["C4"] = sheet_title #สาขา
+            salib["B8"] = f"{respound['ofmonth'].format(month=month[date_m.strftime('%B')],year=date_m.year)}"
+            # "Key":[text_pos,value_pos,col_pos]
+
+            for field in SLIP_DETAIL.items():
+                key,text_pos ,value_pos ,col_pos = field[0],field[1][0],field[1][1],field[1][2]
+                salib[text_pos] = respound[key]
+                if value_pos:
+                    if type(col_pos) == int:
+                        salib[value_pos] = self.get_value(sheet,col_pos,i)
+                    else:
+                        salib[value_pos] = col_pos
+            copy.save(temp_excel.name)
+
+            app = client.DispatchEx("Excel.Application")
+            app.Interactive = False
+            app.Visible = False
+            wb = app.Workbooks.Open(temp_excel.name)
+            wb.ActiveSheet.PageSetup.Orientation = 2
+            wb.ActiveSheet.PageSetup.Zoom = False
+            wb.ActiveSheet.PageSetup.FitToPagesTall = 1
+            wb.ActiveSheet.PageSetup.FitToPagesWide = 1
+            
+            filename = f"{self.get_value(sheet,2,i)},{self.get_value(sheet,22,i)},0,{date_m.strftime('%B')},{datetime.now().strftime('%d%m%y%H%M%S')}"
+            wb.ActiveSheet.ExportAsFixedFormat(0,os.path.join(self.output_dir,sheet_title,f"{filename}"))
+            temp_excel.close()
+
     def extract_convert(self,people_pre:list,date_m:date):
         global creating
         creating = True
@@ -127,61 +175,20 @@ class excel():
             people.append(new)
         self.re_init()
         self.people = people
-        app = client.DispatchEx("Excel.Application")
-        app.Interactive = False
-        app.Visible = False
-        index = 0
 
+        tasks = []
         for sheet in self.sources:
-            for i in self.temporary.sheetnames:
-                if i != "สลิป":
-                    self.temporary.remove(self.temporary[i])
             for i in range(self.get_round(sheet)):
-                    sheet_title = sheet.title.replace('D','')
-                    i += 3
-                    if not self.get_value(sheet,2,i) in people:
-                        continue
-                    index += 1
-                    self.mkdir(sheet_title)
-                    self.progress(index,self.get_value(sheet,2,i),sheet_title)
-                    respound = self.get_lang(self.get_value(sheet,27,i))
-                    img = openpyxl.drawing.image.Image(LOGO_PATH)
-                    img.anchor = 'B1'
-                    ws = [i.title for i in self.salib]
-                    salib = self.temporary[ws[0]]
-                    salib.add_image(img)
-                    
-                    salib["C1"] = respound["address"][sheet_title]["adline1"]
-                    salib["C2"] = respound["address"][sheet_title]["adline2"]
-                    salib["C3"] = respound["address"][sheet_title]["adline3"]
-                    salib["C4"] = sheet_title #สาขา
-                    salib["B8"] = f"{respound['ofmonth'].format(month=month[date_m.strftime('%B')],year=date_m.year)}"
-                    # "Key":[text_pos,value_pos,col_pos]
+                i += 3
+                if not self.get_value(sheet,2,i) in people:
+                    continue
+                task = threading.Thread(target=self.proceed,args=(sheet,i,date_m,))
+                tasks.append(task)
+                task.start()
 
-                    for field in SLIP_DETAIL.items():
-                        key,text_pos ,value_pos ,col_pos = field[0],field[1][0],field[1][1],field[1][2]
-                        salib[text_pos] = respound[key]
-                        if value_pos:
-                            if type(col_pos) == int:
-                                salib[value_pos] = self.get_value(sheet,col_pos,i)
-                            else:
-                                salib[value_pos] = col_pos
-                    
-                    filename = f"{self.get_value(sheet,2,i)},{self.get_value(sheet,22,i)},0,{date_m.strftime('%B')},{datetime.now().strftime('%d%m%y%H%M%S')}"
-                    finalpath_ex = os.path.join(self.output_dir,sheet_title,f"{filename}.xlsx")
-                    self.temporary.save(finalpath_ex)
-                    wb = app.Workbooks.Open(finalpath_ex)
-                    wb.ActiveSheet.PageSetup.Orientation = 2
-                    wb.ActiveSheet.PageSetup.Zoom = False
-                    wb.ActiveSheet.PageSetup.FitToPagesTall = 1
-                    wb.ActiveSheet.PageSetup.FitToPagesWide = 1
-                    wb.ActiveSheet.ExportAsFixedFormat(0,os.path.join(self.output_dir,sheet_title,f"{filename}"))
-                    wb.Save()
-                    wb.Close()   
-                    os.remove(finalpath_ex)
-            shutil.copyfile(self.path,self.temporaries)
-            self.temporary = load_workbook(self.temporaries,data_only=True)
-        os.remove(self.temporaries)
+        for task in tasks:
+            task.join()  
+
         self.complete = True
         self.progress()
         creating = False
