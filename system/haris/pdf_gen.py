@@ -82,13 +82,13 @@ class excel():
     
     def get_value(self,source,col,i):
         result = source.cell(row=i, column=col).value
-        if result == None:
+        if result == None or result == '0':
             result = "-"
         return result
     
     def get_round(self,source):
         i=0
-        while source.cell(row=i+3, column=1).value != None:
+        while source.cell(row=i+3, column=1).value != None or source.cell(row=i+3, column=2).value != None:
             i+=1
         return i
     

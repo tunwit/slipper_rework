@@ -87,7 +87,7 @@ class excel():
     
     def get_round(self,source):
         i=0
-        while source.cell(row=i+3, column=1).value != None:
+        while source.cell(row=i+3, column=1).value != None or source.cell(row=i+3, column=2).value != None:
             i+=1
         return i
     
@@ -135,7 +135,6 @@ class excel():
             for i in self.temporary.sheetnames:
                 if i != "สลิป":
                     self.temporary.remove(self.temporary[i])
-            file = []
             for num,i in enumerate(range(self.get_round(sheet)),1):
                     sheet_title = sheet.title.replace('D','')
                     i += 3
@@ -170,8 +169,6 @@ class excel():
                     filename = f"{self.get_value(sheet,2,i)},{self.get_value(sheet,20,i)},0,{date_m.strftime('%B')},{datetime.now().strftime('%d%m%y%H%M%S')}"
                     finalpath_ex = os.path.join(self.output_dir,sheet_title,f"{filename}.xlsx")
                     self.temporary.save(finalpath_ex)
-                    file.append(salib['C6'].value)
-                    time.sleep(0.3)
                     wb = app.Workbooks.Open(finalpath_ex)
                     wb.ActiveSheet.PageSetup.Orientation = 2
                     wb.ActiveSheet.PageSetup.Zoom = False
@@ -180,7 +177,6 @@ class excel():
                     wb.ActiveSheet.ExportAsFixedFormat(0,os.path.join(self.output_dir,sheet_title,f"{filename}"))
                     wb.Save()
                     wb.Close()   
-                    time.sleep(0.1)
                     os.remove(finalpath_ex)
             shutil.copyfile(self.path,self.temporaries)
             self.temporary = load_workbook(self.temporaries,data_only=True)
