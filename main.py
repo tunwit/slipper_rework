@@ -518,7 +518,8 @@ class GmailSender(MDScreen):
             'email':data.email,
             'branch':data.branch,
             'file_name':data.file_name,
-            'ofmonth':ofmonth
+            'ofmonth':ofmonth,
+            'createat':createat
         }
         if button.active:
             self.going_to_send.append(payload)
@@ -864,6 +865,9 @@ class SliperApp(MDApp):
         return screen
     
     def on_start(self):
+       if not os.path.exists(f'slip'):
+            os.mkdir(f'slip')
+
        if not os.path.exists(f'slip/{SHOP_NAME}'):
             os.mkdir(f'slip/{SHOP_NAME}')
        sc_lst = self.root.ids.mana.screen_names

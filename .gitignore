@@ -1,3 +1,8 @@
 *.env
 *.env.haris
 *.env.tukkae
+slip/
+todo.txt
+**/__pycache__/
+__pycache__
+__pycache__/

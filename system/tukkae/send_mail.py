@@ -65,7 +65,17 @@ class send_email():
         msg['Date'] = formatdate(localtime=True)
         body = f"""
             Testing System
-            กำลังทดสอบระบบ..."""
+            กำลังทดสอบระบบ...
+
+            Name:{person['name']}
+            Path:{person['path']}
+            Email:{person['email']}
+            Branch:{person['branch']}
+            File_name:{person['file_name']}
+            Ofmonth:{person['ofmonth']}
+            Createat_raw:{person['createat']}
+            Createat_converted:{datetime.strptime(person['createat'],'%d%m%y%H%M%S')}
+            """
         msg.attach(MIMEText(body,'plain'))
         return msg
 
@@ -98,7 +108,7 @@ class send_email():
 
         with open(person["path"],'rb') as f:   
             attach = MIMEApplication(f.read(),_subtype="pdf")
-        attach.add_header('Content-Disposition','attachment',filename=f"เงินเดือนของ {person['name']} ประจำเดือน {month['ofmonth']} {datetime.strptime(createat,'%d%m%y%H%M%S').year+345}.pdf")
+        attach.add_header('Content-Disposition','attachment',filename=f"เงินเดือนของ {person['name']} ประจำเดือน {month['ofmonth']} {datetime.strptime(person['createat'],'%d%m%y%H%M%S').year+345}.pdf")
         msg.attach(attach)
         return msg
 
@@ -111,9 +121,7 @@ class send_email():
             password = os.getenv('email_password')
             context = ssl.create_default_context()
             with smtplib.SMTP_SSL('smtp.gmail.com',465,context = context) as smtp:
-                smtp.login(sender,password) 
-                name,email,checker,ofmonth,createat = person['file_name'][:-4].split(',')
-                
+                smtp.login(sender,password)           
                 msg = self.msg_test_gen(person)
                 success = False
                 attemp = 0
@@ -123,18 +131,18 @@ class send_email():
                         smtp.sendmail(os.getenv('sender_email'),person['email'],msg.as_string())
                         success = True
                     except Exception as e:
-                        print(f"Fail to send mail to {name} | {email} trying {attemp}/{config['email_attemps']} due to {e}")
+                        print(f"Fail to send mail to {person['name']} | {person['email']} trying {attemp}/{config['email_attemps']} due to {e}")
 
                 self.progress(self.index,person['name'],person['branch'])
                 if not success:
-                    print(f"Unable to send mail to {name} | {email}")
+                    print(f"Unable to send mail to {person['name']} | {person['email']}")
                     return
                 smtp.quit()
                 print(f'Mail has send to {person["name"]} | {person["email"]} {self.index}/{len(person)}')
 
                 path_name:str = os.path.split(person["path"])
                 checker = '1'
-                new_name = ','.join([name,email,checker,ofmonth,createat])+'.pdf'
+                new_name = ','.join([person['name'],person['email'],checker,person['ofmonth'],person['createat']])+'.pdf'
                 new_path = os.path.join(path_name[0],new_name)
                 try:
                     os.rename(person["path"],new_path)
