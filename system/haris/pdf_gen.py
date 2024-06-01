@@ -150,80 +150,17 @@ class excel():
                     ws = [i.title for i in self.salib]
                     salib = self.temporary[ws[0]]
                     salib.add_image(img)
-
+                    
                     salib["C1"] = respound["address"][sheet_title]["adline1"]
                     salib["C2"] = respound["address"][sheet_title]["adline2"]
                     salib["C3"] = respound["address"][sheet_title]["adline3"]
-                    salib["B4"] = respound["branch"]
-                    salib["B5"] = respound["personnelcode"]
-                    salib["B6"] = respound["name"]
-                    salib["B7"] = respound["position"]
-                    salib["B9"] = respound["earnings"]
-                    salib["B11"] = respound["salary"]
-                    salib["B12"] = respound["positionallowance"]
-                    salib["B13"] = respound["otd"]
-                    salib["B14"] = respound["oth"]
-                    salib["B15"] = respound["otho"]
-                    salib["B16"] = respound["diligenceallowance"]
-                    salib["B17"] = respound["welfare"]
-                    salib["B18"] = respound["target"]
-                    salib["B19"] = respound["bonus"]
-                    salib["B21"] = respound["totale"]
-                    salib["B23"] = respound["net"]
-                    salib["A25"] = respound["warning"]
-                    salib["F21"] = respound["totled"]
-                    salib["F17"] = respound["loan"]
-                    salib["F16"] = respound["debt"]
-                    salib["F15"] = respound["leave"]
-                    salib["F14"] = respound["late"]
-                    salib["F13"] = respound["repayment"]
-                    salib["F12"] = respound["social"]
-                    salib["F11"] = respound["advance"]
-                    salib["F9"] = respound["deduction"]
-                    salib["J1"] = respound["payslip"]
-                    salib["K9"] = respound["details"]
-                    salib["K11"] = respound["absent"]
-                    salib["K12"] = respound["late"]
-                    salib["K13"] = respound["sick"]
-                    salib["K14"] = respound["personal"]
-                    salib["K15"] = respound["vacation"]
-                    salib["K16"] = respound["otd"]
-                    salib["K17"] = respound["oth"]
-                    salib["K18"] = respound["otho"]
-
                     salib["C4"] = sheet_title #สาขา
-                    salib["C5"] = self.get_value(sheet,1,i) #รหัสพนักงาน
-                    salib["C6"] = self.get_value(sheet,2,i) #ชื่อ-สกุล
-                    salib["C7"] = self.get_value(sheet,4,i) #ตำเเหน่ง
-                    # salib["B8"] = f"{respound['ofmonth']} {mouth[(date - relativedelta(months=1)).strftime('%B')]} {date.year}"
                     salib["B8"] = f"{respound['ofmonth'].format(month=month[date_m.strftime('%B')],year=date_m.year)}"
-                    salib["C11"] = self.get_value(sheet,5,i) #อัตราเงินเดือน
-                    salib["C12"] = self.get_value(sheet,6,i) #ค่าตำแหน่ง
-                    salib["C13"] = self.get_value(sheet,7,i) #OT (วัน)
-                    salib["C14"] = self.get_value(sheet,8,i) #OT (ชั่วโมง)
-                    salib["C15"] = self.get_value(sheet,9,i) #OT (ชั่วโมงวันขัตฤกษ์)
-                    salib["C16"] = self.get_value(sheet,10,i) #เบี้ยขยัน
-                    salib["C17"] = self.get_value(sheet,15,i) #สวัสดิการอื่นๆ
-                    salib["C18"] = self.get_value(sheet,19,i) #ยอดเป้า
-                    salib["C19"] = self.get_value(sheet,20, i) #โบนัส
-                    salib["G11"] = self.get_value(sheet,11,i) #เบิก
-                    salib["G12"] = self.get_value(sheet,12,i) #ประกันสังคม
-                    salib["G13"] = self.get_value(sheet,13,i) #ยอดจ่ายเงินกู้
-                    salib["G14"] = self.get_value(sheet,17,i) #สาย
-                    salib["G15"] = self.get_value(sheet,18,i) #ลา
-                    salib["G16"] = self.get_value(sheet,16,i) #หนี้
-                    salib["G17"] = self.get_value(sheet,14,i) #ยอดเงินกู้คงเหลือ
-                    salib["L11"] = self.get_value(sheet,23,i) #ขาด
-                    salib["L12"] = self.get_value(sheet,24,i) #สาย (นาที)
-                    salib["L13"] = self.get_value(sheet,25,i) #ลาป่วย
-                    salib["L14"] = self.get_value(sheet,26,i) #ลากิจ(วัน)
-                    salib["L15"] = self.get_value(sheet,27,i) #ลาพักร้อน(วัน)
-                    salib["L16"] = self.get_value(sheet,28,i) #OT (วัน)
-                    salib["L17"] = self.get_value(sheet,29,i) #OT (ชั่วโมง)
-                    salib["L18"] = self.get_value(sheet,30,i) #OT (ชั่วโมงวันขัตฤกษ์)
-                    salib["C21"] = '=SUM(C11:C19)' #รวมเงินได้
-                    salib["G21"] = '=SUM(G11:G16)' #รวมรายการหัก
-                    salib["C23"] = self.get_value(sheet,21,i) #รายได้สุทธิ
+                    # (text_pos,value_pos,col_pos)
+
+                    # salib["B8"] = f"{respound['ofmonth']} {mouth[(date - relativedelta(months=1)).strftime('%B')]} {date.year}"
+
+                    
                     filename = f"{self.get_value(sheet,2,i)},{self.get_value(sheet,22,i)},0,{date_m.strftime('%B')},{datetime.now().strftime('%d%m%y%H%M%S')}"
                     finalpath_ex = os.path.join(self.output_dir,sheet_title,f"{filename}.xlsx")
                     self.temporary.save(finalpath_ex)
