@@ -158,7 +158,10 @@ class excel():
                     salib["B8"] = f"{respound['ofmonth'].format(month=month[date_m.strftime('%B')],year=date_m.year)}"
                     # "Key":[text_pos,value_pos,col_pos]
 
+                    email = self.get_value(sheet,SLIP_DETAIL['email_col'],i)
                     for field in SLIP_DETAIL.items():
+                        if field[0] == "email_col":
+                            continue
                         key,text_pos ,value_pos ,col_pos = field[0],field[1][0],field[1][1],field[1][2]
                         salib[text_pos] = respound[key]
                         if value_pos:
@@ -167,7 +170,7 @@ class excel():
                             else:
                                 salib[value_pos] = col_pos
                     
-                    filename = f"{self.get_value(sheet,2,i)},{self.get_value(sheet,22,i)},0,{date_m.strftime('%B')},{datetime.now().strftime('%d%m%y%H%M%S')}"
+                    filename = f"{self.get_value(sheet,2,i)},{email},0,{date_m.strftime('%B')},{datetime.now().strftime('%d%m%y%H%M%S')}"
                     finalpath_ex = os.path.join(self.output_dir,sheet_title,f"{filename}.xlsx")
                     self.temporary.save(finalpath_ex)
                     wb = app.Workbooks.Open(finalpath_ex)

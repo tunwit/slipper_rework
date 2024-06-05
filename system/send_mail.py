@@ -12,7 +12,7 @@ from email.utils import formatdate
 import time
 import threading
 from datetime import datetime
-from setup_config import EMAIL_ATTEMP ,SENDER ,PASSWORD
+from setup_config import EMAIL_ATTEMP ,SENDER ,PASSWORD, FROM_EMAIL
 
 month = {
         "January":"มกราคม", 
@@ -55,7 +55,7 @@ class send_email():
 
     def msg_test_gen(self,person):
         msg = MIMEMultipart()
-        msg['From'] = 'ตุ๊กแกอวกาศ "Steak"'
+        msg['From'] = FROM_EMAIL
         msg['To'] = person['email']
         msg['subject'] = f'ทดสอบระบบ System Testing'
         msg['Date'] = formatdate(localtime=True)
@@ -77,16 +77,17 @@ class send_email():
 
     def msg_production_gen(self,person):  
         msg = MIMEMultipart()
-        msg['From'] = 'ตุ๊กแกอวกาศ "Steak"'
+        msg['From'] = FROM_EMAIL
         msg['To'] = person['email']
         msg['subject'] = f'สลิปเงินเดือนของ {person["name"]}'
         msg['Date'] = formatdate(localtime=True)
         
-        body = f"""เรียนคุณ {person['name']} 
+        body = f"""
+                เรียนคุณ {person['name']} 
         นี่คือใบเเจ้งเงินเดือนประจำเดือน {person['ofmonth']} หากมีปัญหาหรือขอผิดพลาดประการใดกรุณาติดต่อผู้ดูเเล"""
-        msg.attach(MIMEText(body,'plain'))
 
-        # msg.attach(MIMEText('<img src="cid:image1" width="1000" height="772">', 'html'))
+        # msg.attach(MIMEText(body)) bug
+        msg.attach(MIMEText('<img src="cid:image1" width="1000" height="772">', 'html'))
         
         pdf = pdfium.PdfDocument(person['path'])
         page = pdf.get_page(0)
@@ -104,7 +105,7 @@ class send_email():
 
         with open(person["path"],'rb') as f:   
             attach = MIMEApplication(f.read(),_subtype="pdf")
-        attach.add_header('Content-Disposition','attachment',filename=f"เงินเดือนของ {person['name']} ประจำเดือน {month['ofmonth']} {datetime.strptime(person['createat'],'%d%m%y%H%M%S').year+345}.pdf")
+        attach.add_header('Content-Disposition','attachment',filename=f"เงินเดือนของ {person['name']} ประจำเดือน {month[person['ofmonth']]} {datetime.strptime(person['createat'],'%d%m%y%H%M%S').year+345}.pdf")
         msg.attach(attach)
         return msg
 
@@ -115,7 +116,7 @@ class send_email():
             context = ssl.create_default_context()
             with smtplib.SMTP_SSL('smtp.gmail.com',465,context = context) as smtp:
                 smtp.login(SENDER,PASSWORD)            
-                msg = self.msg_test_gen(person)
+                msg = self.msg_production_gen(person)
                 success = False
                 attemp = 0
                 while not success and attemp < EMAIL_ATTEMP:
@@ -125,6 +126,7 @@ class send_email():
                         success = True
                     except Exception as e:
                         print(f"Fail to send mail to {person['name']} | {person['email']} trying {attemp}/{EMAIL_ATTEMP} due to {e}")
+                        time.sleep(0.4)
 
                 self.progress(self.index,person['name'],person['branch'])
                 if not success:
@@ -156,7 +158,7 @@ class send_email():
             thread = threading.Thread(target=self.send_emails, args=(person,))
             threads.append(thread)
             thread.start()
-            time.sleep(0.2)
+            time.sleep(0.4)
 
         for thread in threads:
             thread.join()

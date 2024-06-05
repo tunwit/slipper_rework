@@ -2,6 +2,7 @@
     "shop_id":"2",
     "email_attemps":5,
     "haris_slip_details":{
+        "email_col":22,
         "branch":["B4",0,0],
         "earnings":["B9",0,0],
         "warning":["A25",0,0],
@@ -40,6 +41,7 @@
         "otho_detail":["K18","L18",30]
     },
     "tukkae_slip_details":{
+        "email_col":20,
         "branch":["B4",0,0],
         "earnings":["B9",0,0],
         "warning":["A25",0,0],
@@ -62,6 +64,7 @@
         "totled":["F21","G21","=SUM(G11:G14)"],
         "net":["B23","C23",19],
         "loan":["F15","G15",11],
+        "repayment":["F14","G14",10],
         "totallate":["F13","G13",13],
         "social":["F12","G12",9],
         "advance":["F11","G11",8],
