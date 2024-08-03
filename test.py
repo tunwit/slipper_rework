@@ -1,3 +1,3 @@
-import os 
-dir_path = os.getcwd()
-print(dir_path)
+import js2py
+res = js2py.run_file("test.js")
+print(res)
