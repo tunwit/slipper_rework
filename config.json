@@ -44,7 +44,7 @@
         "email_col":20,
         "branch":["B4",0,0],
         "earnings":["B9",0,0],
-        "warning":["A25",0,0],
+        "warning":["A26",0,0],
         "deduction":["F9",0,0],
         "payslip":["J1",0,0],
         "details":["K9",0,0],

@@ -171,6 +171,7 @@ class excel():
                                 salib[value_pos] = col_pos
                     
                     filename = f"{self.get_value(sheet,2,i)},{email},0,{date_m.strftime('%B')},{datetime.now().strftime('%d%m%y%H%M%S')}"
+                    print(filename)
                     finalpath_ex = os.path.join(self.output_dir,sheet_title,f"{filename}.xlsx")
                     self.temporary.save(finalpath_ex)
                     wb = app.Workbooks.Open(finalpath_ex)
