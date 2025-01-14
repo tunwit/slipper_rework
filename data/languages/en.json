@@ -1,75 +1,80 @@
 {
-    "address":{
-        "ตุ๊กแกอวกาศสามัคคี":{
-            "adline1":"I AM FOOD Inc",
-            "adline2":"63/34 Leang muang Pakkret Rd., Bangtalad, Pakkret, Nonthaburi 11120 ",
-            "adline3":"TIN 0125562015764"
-        },
-        "ตุ๊กแกอวกาศรามอินทรา":{
-            "adline1":"I AM FOOD Inc",
-            "adline2":"63/34 1st Soi,Khan Na Yao, Bangkok 10230",
-            "adline3":"TIN 0125562015764"
-        },
-        "Butcher":{
-            "adline1":"บริษัท ไอแอมฟู้ด จำกัด",
-            "adline2":"63/34 ซอย1 แขวง คันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
-            "adline3":"เลขที่ผู้เสียภาษี 0125562015764"
-        },
-        "ครัวกลาง":{
-            "adline1":"บริษัท ไอแอมฟู้ด จำกัด",
-            "adline2":"63/34 ซอย1 แขวง คันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
-            "adline3":"เลขที่ผู้เสียภาษี 0125562015764"
-        },
-        "นนทบุรี":{
-            "adline1":"บริษัท ไอแอมฟู้ด จำกัด",
-            "adline2":"63/34 ถนนเลี่ยงเมืองปากเกร็ด ตำบลบางตลาด อ.ปากเกร็ด เทศบาลนครนนทบุรี  จ.นนทบุรี 11120 ",
-            "adline3":"เลขที่ผู้เสียภาษี 0125562015764"
-        },
-        "รามอินทรา":{
-            "adline1":"บริษัท ไอแอมฟู้ด จำกัด",
-            "adline2":"63/34 ซอย1 แขวง คันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
-            "adline3":"เลขที่ผู้เสียภาษี 0125562015764"
-        }
+  "address": {
+    "ตุ๊กแกอวกาศสามัคคี": {
+      "adline1": "I AM FOOD Inc",
+      "adline2": "63/34 Leang muang Pakkret Rd., Bangtalad, Pakkret, Nonthaburi 11120 ",
+      "adline3": "TIN 0125562015764"
     },
-    "รามอินทรา":"Ramintra",
-    "นนทบุรี":"Pakkret",
-    "payslip":"Pay Slip",
-    "branch":"Branch :",
-    "personnelcode":"Personnel Code :",
-    "name":"Name - Surname :",
-    "position":"Position :",
-    "paymentdate":"Payment Date :",
-    "earnings":"Earnings",
-    "deduction":"Deduction",
-    "salary":"Salary :",
-    "positionallowance":"Position Allowance :",
-    "otd":"OT (Days) :",
-    "oth":"OT (Hours) :",
-    "otho":"OT (Holidays)",
-    "diligenceallowance":"Diligence Allowance :",
-    "welfare":"Welfare :",
-    "target":"Target balance",
-    "incentive":"Incentive :",
-    "bonus":"Bonus :",
-    "totale":"Total Earnings :",
-    "totled":"Total Deductions :",
-    "net":"Net Income :",
-    "advance":"Salary Advance :",
-    "social":"Social Security Fund :",
-    "repayment":"Repayment :",
-    "leave":"Leave :",
-    "ofmonth":"{month} {year+543}",
-    "debt":"Debt :",
-    "loan":"Loan :",
-    "details":"Details",
-    "absent":"Absent :",
-    "late":"Late :",
-    "late_detail":"Late :",
-    "sick":"Sick Leave :",
-    "personal":"Personal Leave :",
-    "vacation":"Vacation Leave :",
-    "warning":"Salary and wage are confidential infomation. Disclosure is strictly prohibited. This document is only valid with an autorized signature and company stamp",
-    "efficient":"Efficient",
-    "holidays":"Holidays",
-    "totallate":"Leave/Late/Absent"
+    "ตุ๊กแกอวกาศรามอินทรา": {
+      "adline1": "I AM FOOD Inc",
+      "adline2": "63/34 1st Soi,Khan Na Yao, Bangkok 10230",
+      "adline3": "TIN 0125562015764"
+    },
+    "Butcher": {
+      "adline1": "บริษัท ไอแอมฟู้ด จำกัด",
+      "adline2": "63/34 ซอย1 แขวง คันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
+      "adline3": "เลขที่ผู้เสียภาษี 0125562015764"
+    },
+    "ครัวกลาง": {
+      "adline1": "บริษัท ไอแอมฟู้ด จำกัด",
+      "adline2": "63/34 ซอย1 แขวง คันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
+      "adline3": "เลขที่ผู้เสียภาษี 0125562015764"
+    },
+    "นนทบุรี": {
+      "adline1": "บริษัท ไอแอมฟู้ด จำกัด",
+      "adline2": "63/34 ถนนเลี่ยงเมืองปากเกร็ด ตำบลบางตลาด อ.ปากเกร็ด เทศบาลนครนนทบุรี  จ.นนทบุรี 11120 ",
+      "adline3": "เลขที่ผู้เสียภาษี 0125562015764"
+    },
+    "รามอินทรา": {
+      "adline1": "บริษัท ไอแอมฟู้ด จำกัด",
+      "adline2": "63/34 ซอย1 แขวง คันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
+      "adline3": "เลขที่ผู้เสียภาษี 0125562015764"
+    },
+    "กัลปพฤกษ์": {
+      "adline1": "บริษัท ไอแอมฟู้ด จำกัด",
+      "adline2": "63/34 ซอย1 แขวง คันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
+      "adline3": "เลขที่ผู้เสียภาษี 0125562015764"
+    }
+  },
+  "รามอินทรา": "Ramintra",
+  "นนทบุรี": "Pakkret",
+  "payslip": "Pay Slip",
+  "branch": "Branch :",
+  "personnelcode": "Personnel Code :",
+  "name": "Name - Surname :",
+  "position": "Position :",
+  "paymentdate": "Payment Date :",
+  "earnings": "Earnings",
+  "deduction": "Deduction",
+  "salary": "Salary :",
+  "positionallowance": "Position Allowance :",
+  "otd": "OT (Days) :",
+  "oth": "OT (Hours) :",
+  "otho": "OT (Holidays)",
+  "diligenceallowance": "Diligence Allowance :",
+  "welfare": "Welfare :",
+  "target": "Target balance",
+  "incentive": "Incentive :",
+  "bonus": "Bonus :",
+  "totale": "Total Earnings :",
+  "totled": "Total Deductions :",
+  "net": "Net Income :",
+  "advance": "Salary Advance :",
+  "social": "Social Security Fund :",
+  "repayment": "Repayment :",
+  "leave": "Leave :",
+  "ofmonth": "{month} {year+543}",
+  "debt": "Debt :",
+  "loan": "Loan :",
+  "details": "Details",
+  "absent": "Absent :",
+  "late": "Late :",
+  "late_detail": "Late :",
+  "sick": "Sick Leave :",
+  "personal": "Personal Leave :",
+  "vacation": "Vacation Leave :",
+  "warning": "Salary and wage are confidential infomation. Disclosure is strictly prohibited. This document is only valid with an autorized signature and company stamp",
+  "efficient": "Efficient",
+  "holidays": "Holidays",
+  "totallate": "Leave/Late/Absent"
 }

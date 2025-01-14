@@ -109,7 +109,7 @@ class send_email():
         msg.attach(attach)
         return msg
 
-    def send_emails(self,person):
+    def send_emails(self,person,length):
             self.index += 1
             if person['email'] == "-":
                 return
@@ -133,7 +133,7 @@ class send_email():
                     print(f"Unable to send mail to {person['name']} | {person['email']}")
                     return
                 smtp.quit()
-                print(f'Mail has send to {person["name"]} | {person["email"]} {self.index}/{len(person)}')
+                print(f'Mail has send to {person["name"]} | {person["email"]} {self.index}/{length}')
 
                 path_name:str = os.path.split(person["path"])
                 checker = '1'
@@ -154,11 +154,15 @@ class send_email():
         # \t\t\t\t\tบริษัท ไอแอมฟู้ด จำกัด
         # """
         threads = []
-        for person in people:
-            thread = threading.Thread(target=self.send_emails, args=(person,))
+        length = len(people)
+        for i,person in enumerate(people):
+            thread = threading.Thread(target=self.send_emails, args=(person,length,))
             threads.append(thread)
             thread.start()
             time.sleep(0.4)
+            if i %5 == 0:
+                time.sleep(2)
+                
 
         for thread in threads:
             thread.join()
