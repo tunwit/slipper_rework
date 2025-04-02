@@ -1,0 +1,4 @@
+Kivy
+kivymd
+openpyxl
+pypdfium2

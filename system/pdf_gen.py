@@ -185,6 +185,7 @@ class excel():
                     os.remove(finalpath_ex)
             shutil.copyfile(self.path,self.temporaries)
             self.temporary = load_workbook(self.temporaries,data_only=True)
+            time.sleep(0.1)
         os.remove(self.temporaries)
         self.complete = True
         self.progress()
