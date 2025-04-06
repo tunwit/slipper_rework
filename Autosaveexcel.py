@@ -211,7 +211,6 @@ class Autosave():
             for i in self.temporary.sheetnames:
                     if i != "สลิป":
                         self.temporary.remove(self.temporary[i])
-            print(self.temporary.sheetnames)
             salib = self.temporary["สลิป"]
             img = openpyxl.drawing.image.Image(f'{os.getcwd()}\\Harislogo.jpg')
             img.anchor = 'B1'

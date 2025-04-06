@@ -88,7 +88,6 @@ class SlipMaker(MDScreen):
     total_individual_checkbox = 0
 
     def call_back_create_slip(self,data):
-        print(data)
         if data['status'] == 'processing':
             Clock.schedule_once(lambda dt: self.update_progress_slip_bar(data))
         elif data['status'] == 'complete':   
@@ -178,7 +177,6 @@ class SlipMaker(MDScreen):
             radius=[20, 7, 20, 7],
             buttons=[cancle_button,start_button]
         )
-        print(self.going_to_make_slip)
         self.confirm_makeslip_dialog.open()
     
     def individual_selected(self,button:MDCheckbox,pos):
@@ -293,7 +291,6 @@ class SlipMaker(MDScreen):
                 item.add_widget(check)
                 b = str(branch.title) +'slip'
                 self.ids[b].add_widget(item)
-        print(self.ids)
         scroll.add_widget(mdlst_slip)
         fram1.add_widget(scroll)
         fram1.add_widget(MDSeparator())
@@ -611,7 +608,6 @@ class GmailSender(MDScreen):
     def no_employee_label(self):
         for path in os.listdir(f'slip/{SHOP_NAME}'):
             try:
-                print(f'slip/{SHOP_NAME}/{path}')
                 os.rmdir(f'slip/{SHOP_NAME}/{path}')
             except:pass
         label = MDLabel(
@@ -658,7 +654,6 @@ class Employee(MDScreen):
 
     def delete_selected(self):
         for person in self.going_to_delete:
-            print(person)
             thread = threading.Thread(target=self.deletion, args=(person['path'],))
             thread.start()      
         snackbar = MDSnackbar(

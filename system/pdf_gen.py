@@ -14,6 +14,7 @@ import openpyxl
 from openpyxl import load_workbook
 import shutil
 from setup_config import SLIP_DETAIL, LOGO_PATH, SHOP_NAME
+from openpyxl.styles import Font
 
 creating = False
 
