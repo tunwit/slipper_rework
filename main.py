@@ -24,13 +24,13 @@ from kivymd.uix.textfield import MDTextField
 from kivymd.uix.pickers import MDDatePicker
 from kivy.clock import Clock
 import os
-import tkinter
-from tkinter import filedialog
 from kivymd.uix.list import OneLineAvatarIconListItem
 from kivymd.font_definitions import theme_font_styles
 import os
 from kivy.properties import  StringProperty,BooleanProperty,ListProperty
 from kivymd.uix.expansionpanel import MDExpansionPanel, MDExpansionPanelTwoLine
+from kivy.uix.filechooser import FileChooserIconView
+from kivy.uix.popup import Popup
 import os
 from datetime import date
 from datetime import datetime
@@ -42,6 +42,7 @@ from setup_config import SHOP_ID,SHOP_NAME,TITLE
 from system.send_mail import send_email
 from system.pdf_gen import excel 
 from system.pdf_gen import creating
+from pathlib import Path
 
 """
 
@@ -72,13 +73,35 @@ mouth = {
         "December":"ธันวาคม"
     }
 
+font_path = Path(__file__).parent / "data" / "font" / "THSarabunNew.ttf"
+font_posix = font_path.as_posix()
+
 class Content(BoxLayout):
     pass
+
+class FileChooser(Popup):
+    def __init__(self, on_file_selected, **kwargs):
+        super().__init__(title="Choose Excel File", size_hint=(0.9, 0.9), **kwargs)
+        self.filechooser = FileChooserIconView(path=os.getcwd(),filters=["*.xlsx"])
+        self.content = self.filechooser
+        self.on_file_selected = on_file_selected
+        self.filechooser.bind(on_submit=self._file_chosen)
+
+    def _file_filter(self, folder, file):
+        return not os.path.isdir(file)
+
+    def _file_chosen(self, instance, selection, touch):
+        if selection:
+            self.dismiss()
+            self.on_file_selected(selection[0]) 
 
 class list_container(IRightBodyTouch, MDBoxLayout):
     adaptive_height=True
 
 class SlipMaker(MDScreen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
     def on_start(self):
         pass
 
@@ -254,27 +277,27 @@ class SlipMaker(MDScreen):
         scroll = MDScrollView()  
         mdlst_slip = MDList()
         self.ids['lst'] = mdlst_slip
-        for branch in self.excel_object.sources:
-            amount = self.excel_object.get_round(branch)
+        for branchName,df in self.excel_object.dfs.items():
+            amount = self.excel_object.get_round(branchName)
             content = MDBoxLayout()
             content.adaptive_height = True
             content.orientation = 'vertical'
-            self.ids[branch.title+'slip'] = content 
+            self.ids[branchName+'slip'] = content 
             panel = MDExpansionPanel(
                     icon="office-building-outline",
                     content=content,
                     panel_cls=MDExpansionPanelTwoLine(
-                        text=f"[size=25]{branch.title.replace('D','')}[/size]",
+                        text=f"[size=25]{branchName.replace('D','')}[/size]",
                         secondary_text=f"{amount} คน",
                         font_style= "sarabunBold",
                         secondary_font_style= "sarabunBold"
                     )
                 )
             mdlst_slip.add_widget(panel)
-            for num,rows in enumerate(range(amount),1):
-                rows += 3
+
+            for i,employee in df.iterrows():
                 item = OneLineAvatarIconListItem(
-                    text=f"[size=20]{num}.{self.excel_object.get_value(branch,2,rows)}[/size]",
+                    text=f"[size=20]{i}.{self.excel_object.get_value(employee,"ชื่อ-นามสกุล")}[/size]",
                     font_style = "sarabun",
                 )
                 face = IconLeftWidget(
@@ -289,7 +312,7 @@ class SlipMaker(MDScreen):
                 item.add_widget(face)
                 check.add_widget(checkbox)
                 item.add_widget(check)
-                b = str(branch.title) +'slip'
+                b = str(branchName) +'slip'
                 self.ids[b].add_widget(item)
         scroll.add_widget(mdlst_slip)
         fram1.add_widget(scroll)
@@ -321,37 +344,52 @@ class SlipMaker(MDScreen):
         fram1.add_widget(screen)
         self.ids.box1.add_widget(fram1)
 
+    def exit_manager(self, *args):
+        self.file_manager.close()
+    
+    def select_path(self, path: str):
+        self.exit_manager()
+        self.excel_path = os.path.basename(path)
+        self.excel_object = excel(path=path)
+        Clock.schedule_once(self.create_employee_list)
+
     def on_browse(self):
-        path = self.file_open()
-        if path:
-            self.excel_object = excel(path = path)
-            self.going_to_make_slip = []
-            try:
-                self.ids.box1.remove_widget(self.ids.fram1)
-            except:pass
-            Clock.schedule_once(self.create_employee_list)
-            self.snackbar = MDSnackbar(
-                MDLabel(
-                text="Upload Complete !",
-                font_name = 'sarabun',
-                text_color=self.theme_cls.opposite_bg_normal
-            ),
-            pos_hint={"center_x": 0.5},
-            size_hint_x=0.5,
-            md_bg_color="#ffffff"
-            )
-            self.snackbar.open()
+        def handle_file(path):
+            if path.endswith((".xlsx", ".xls")):
+                self.excel_object = excel(path=path)
+                self.going_to_make_slip = []
+                try:
+                    self.ids.box1.remove_widget(self.ids.fram1)
+                except:
+                    pass
+                Clock.schedule_once(self.create_employee_list)
+                self.snackbar = MDSnackbar(
+                    MDLabel(
+                        text="Upload Complete!",
+                        font_name='sarabun',
+                        text_color=self.theme_cls.opposite_bg_normal
+                    ),
+                    pos_hint={"center_x": 0.5},
+                    size_hint_x=0.5,
+                    md_bg_color="#ffffff"
+                )
+                self.snackbar.open()
+            else:
+                print("Not an Excel file")
+
+        file_popup = FileChooser(on_file_selected=handle_file)
+        file_popup.open()
 
     def file_open(self):
-        root = tkinter.Tk()
-        root.withdraw()
-        # root.iconbitmap("YOUR_IMAGE.ico")
-        currdir = os.getcwd()
-        tempdir = filedialog.askopenfilename(parent=root, initialdir=currdir, title='Please select excel file',filetypes=[("Excel files",".xlsx .xls")])
-        path = None
-        if len(tempdir) > 0:
-            path = tempdir
-            self.excel_path = os.path.basename(tempdir)
+        # root = tkinter.Tk()
+        # root.withdraw()
+        # # root.iconbitmap("YOUR_IMAGE.ico")
+        path = filechooser.open_file(title="Pick a CSV file..", 
+                             filters=[("Comma-separated Values", "*.csv")])
+        # path = None
+        # if len(tempdir) > 0:
+        #     path = tempdir
+        #     self.excel_path = os.path.basename(tempdir)
         return path
     
 class CustomOneLineAvatarIconListItem(OneLineAvatarIconListItem):
@@ -807,7 +845,7 @@ class SliperApp(MDApp):
         self.title = TITLE
         self.icon = f'data\icon\{SHOP_NAME}.png'
         LabelBase.register(name='sarabun',
-            fn_regular=r'data\font\THSarabunNew.ttf',
+            fn_regular=font_posix,
         )
         theme_font_styles.append('sarabun')
         self.theme_cls.font_styles["sarabun"] = [
@@ -817,7 +855,7 @@ class SliperApp(MDApp):
             0.15,
         ]
         LabelBase.register(name='sarabunBold',
-            fn_regular=r'data\font\THSarabunNew Bold.ttf'
+            fn_regular=font_posix
         )
         theme_font_styles.append('sarabunBold')
         self.theme_cls.font_styles["sarabunBold"] = [

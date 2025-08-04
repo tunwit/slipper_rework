@@ -2,3 +2,5 @@ Kivy
 kivymd
 openpyxl
 pypdfium2
+pandas
+dotenv
