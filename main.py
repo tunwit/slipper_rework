@@ -43,6 +43,7 @@ from system.send_mail import send_email
 from system.pdf_gen import excel 
 from system.pdf_gen import creating
 from pathlib import Path
+import pandas as pd
 
 """
 
@@ -106,7 +107,7 @@ class SlipMaker(MDScreen):
         pass
 
     excel_path = StringProperty("Please select file")
-    going_to_make_slip = []
+    going_to_make_slip = {}
     excel_object:excel = None
     total_individual_checkbox = 0
 
@@ -203,15 +204,25 @@ class SlipMaker(MDScreen):
         self.confirm_makeslip_dialog.open()
     
     def individual_selected(self,button:MDCheckbox,pos):
-        text = button.parent.parent.parent.text
-        pattern = r'\[.*?\]\d+.(.*?)\[/.*?]'
-        result = re.search(pattern, text)
-        name = result.group(1)
+        expandable = button.parent.parent.parent.parent.parent
+        branch_text = expandable.panel_cls.text
+        name_text = button.parent.parent.parent.text
+        
+        pattern = r'\[size=\d+\](.*?)\[/size\]'
+        result = re.search(pattern, name_text)
+        _id = result.group(1).split('|')[0].strip()
+
+
+        result = re.search(pattern, branch_text)
+        branch = result.group(1).strip()
+
         if button.active:
-            self.going_to_make_slip.append(name)
+            if branch not in self.going_to_make_slip:
+                self.going_to_make_slip[branch] = []
+            self.going_to_make_slip[branch].append(_id)
         else:
             try:
-                self.going_to_make_slip.remove(name)
+                self.going_to_make_slip[branch].remove(_id)
             except:pass
 
         true_state = len(self.going_to_make_slip)
@@ -297,7 +308,7 @@ class SlipMaker(MDScreen):
 
             for i,employee in df.iterrows():
                 item = OneLineAvatarIconListItem(
-                    text=f"[size=20]{i}.{self.excel_object.get_value(employee,"ชื่อ-นามสกุล")}[/size]",
+                    text=f"[size=20]{employee['รหัสพนักงาน']} | {self.excel_object.get_value(employee,"ชื่อ-นามสกุล")}[/size]",
                     font_style = "sarabun",
                 )
                 face = IconLeftWidget(
@@ -357,7 +368,7 @@ class SlipMaker(MDScreen):
         def handle_file(path):
             if path.endswith((".xlsx", ".xls")):
                 self.excel_object = excel(path=path)
-                self.going_to_make_slip = []
+                self.going_to_make_slip = {}
                 try:
                     self.ids.box1.remove_widget(self.ids.fram1)
                 except:

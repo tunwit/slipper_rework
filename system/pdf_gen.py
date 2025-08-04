@@ -16,7 +16,7 @@ from setup_config import SLIP_DETAIL, LOGO_PATH, SHOP_NAME
 from openpyxl.styles import Font
 import pandas as pd
 from pathlib import Path
-
+from jinja2 import Environment, FileSystemLoader
 
 creating = False
 
@@ -53,8 +53,21 @@ class excel():
         to_pop = [df for df in dfs if not df.startswith("D")]
         for b in to_pop:
             dfs.pop(b)
-        dfs = {sheet_name: df.dropna(subset=["ลำดับ","ชื่อ-นามสกุล"]) for sheet_name, df in dfs.items()}
-        return dfs
+
+        cleaned_dfs = {}
+        for sheet_name, df in dfs.items():
+            df.columns.values[0] = "รหัสพนักงาน"
+
+            if "รหัสพนักงาน" in df.columns and "ชื่อ-นามสกุล" in df.columns:
+                first_col = df.columns[0]
+                df[first_col] = df[first_col].astype(pd.Int64Dtype()).astype(str)
+                df.fillna(0, inplace=True)
+                print(df.head())
+                new_name = sheet_name.replace("D", "", 1)  # remove only the first "D"
+                cleaned_dfs[new_name] = df.dropna(subset=["รหัสพนักงาน", "ชื่อ-นามสกุล"])
+
+
+        return cleaned_dfs
     
     def get_output_dir(self):
         output = Path("{os.getcwd()}\slip\{SHOP_NAME}")
@@ -109,21 +122,77 @@ class excel():
                 data.update({'branch':branch})
             self.call_back(data)
 
-    def extract_convert(self,people_pre:list,date_m:date):
+
+    def extract_convert(self,data:dict,date_m:date):
+        print(self.dfs.keys())
         global creating
         creating = True
         people= []
-        for person in people_pre:
-            person:str
-            new = person.replace('[/size]','')
-            people.append(new)
+
         self.re_init()
-        self.people = people
         # app = client.DispatchEx("Excel.Application")
         # app.Interactive = False
         # app.Visible = False
         index = 0
-        print(people)
+        env = Environment(loader=FileSystemLoader('data/template'))
+        template = env.get_template('slip.html')
+        with open("config_2.json","r",encoding="utf8") as config:
+            config = json.load(config)['haris_slip_details']
+
+        for branch in data.keys():
+            for _id in data[branch]:
+                employee_data = self.dfs[branch].loc[self.dfs[branch]["รหัสพนักงาน"] == _id].squeeze()
+                print(employee_data)
+                print(type(employee_data))
+
+                def t(key): 
+                    l = self.get_lang(employee_data['ภาษา'].strip())
+                    return l.get(key,key)
+                
+                employee = {
+                    "name" : employee_data["ชื่อ-นามสกุล"],
+                    "id": employee_data["รหัสพนักงาน"],
+                    "position": employee_data["ตำแหน่ง"],
+                    "branch":branch
+                }
+
+                earnings = [{"label" : t(field['label_key']),
+                             "value":employee_data[field['key']]} 
+                             for field in config['earnings']['fields'] if field['display']]
+                
+                deduction = [{"label" : t(field['label_key']),
+                             "value":employee_data[field['key']]} 
+                             for field in config['deduction']['fields'] if field['display']]
+                
+                details = [{"label" : t(field['label_key']),
+                             "value":employee_data[field['key']]} 
+                             for field in config['details']['fields'] if field['display']]
+                
+                net = {"label":t(config['total']['label_key']),"value":employee_data[config['total']['key']]}
+
+                total_earnings = sum(item["value"] for item in earnings)
+                total_deduction = sum(item["value"] for item in deduction)
+
+                context = {
+                "company":config['company'],
+                "employee": employee,
+                "sections": {
+                    "earnings": earnings,
+                    "deduction": deduction,
+                    "details":details,
+                    "net":net
+                },
+                "totals": {
+                     "earnings": total_earnings,
+                    "deduction": total_deduction,
+                }
+            }
+                print(context)
+                html_out = template.render(context=context)
+                with open("outhtml.html", "w", encoding="utf-8") as f:
+                    f.write(html_out)
+                return
+        return 
         for df in self.dfs:
             for i in self.temporary.sheetnames:
                 if i != "สลิป":

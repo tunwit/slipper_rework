@@ -4,3 +4,4 @@ openpyxl
 pypdfium2
 pandas
 dotenv
+jinja2

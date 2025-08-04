@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Salary Slip</title>
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background-color: #fff;
+        margin: 40px;
+        color: #333;
+        font-size: 14px;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: auto;
+        padding: 30px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+      }
+
+      .logo {
+        max-height: 80px;
+        margin-right: 20px;
+      }
+
+      .company-info h1 {
+        margin: 0;
+        font-size: 22px;
+        color: #007bff;
+      }
+
+      .company-info p {
+        margin: 2px 0;
+      }
+
+      .section-title {
+        font-weight: bold;
+        font-size: 16px;
+        color: #007bff;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 5px;
+        margin-top: 25px;
+      }
+
+      .details-title {
+        font-weight: bold;
+        font-size: 16px;
+        color: #007bff;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 5px;
+        margin-top: 25px;
+      }
+
+      .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 30px;
+        margin-top: 10px;
+      }
+
+      .info-grid p {
+        margin: 4px 0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+
+      th {
+        background-color: #007bff;
+        color: white;
+        padding: 10px;
+        text-align: left;
+      }
+
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+      }
+
+      .totals {
+        font-weight: bold;
+        background-color: #f1f1f1;
+      }
+
+      .footer {
+        margin-top: 30px;
+        text-align: center;
+        font-size: 12px;
+        color: #888;
+      }
+
+      .note {
+        margin-top: 20px;
+        font-size: 13px;
+        background-color: #f8f9fa;
+        padding: 10px;
+        border-left: 4px solid #007bff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header: Logo + Company Info -->
+      <div class="header">
+        <div class="company-info">
+          <h1>Haris premium buffet</h1>
+          <p>บริษัท ไอแอมฟู้ด จำกัด</p>
+          <p><strong>Company ID:</strong> 0125562015764</p>
+        </div>
+      </div>
+
+      <!-- Employee Details -->
+      <div class="section-title">Employee Information</div>
+      <div class="info-grid">
+        <p><strong>Employee ID:</strong> 2</p>
+        <p><strong>Name:</strong> นาย อิบรอเฮง มะแซ</p>
+
+        <p><strong>Position:</strong> หัวหน้าครัวเย็น</p>
+        <p><strong>Branch</strong> 2</p>
+      </div>
+
+      <!-- Earnings -->
+      <div class="section-title">Earnings</div>
+      <table>
+        <tr>
+          <th>Description</th>
+          <th>Amount (THB)</th>
+        </tr>
+        
+        <tr>
+          <td>อัตราเงินเดือน :</td>
+          <td>15,759.00</td>
+        </tr>
+        
+        <tr>
+          <td>ค่าตำแหน่ง :</td>
+          <td>3,000.00</td>
+        </tr>
+        
+        <tr>
+          <td>OT (วัน) :</td>
+          <td>1,050.60</td>
+        </tr>
+        
+        <tr>
+          <td>OT (ชั่วโมง) :</td>
+          <td>0.00</td>
+        </tr>
+        
+        <tr>
+          <td>OT (ชั่วโมงวันขัตฤกษ์)</td>
+          <td>0.00</td>
+        </tr>
+        
+        <tr>
+          <td>เบี้ยขยัน :</td>
+          <td>1,000.00</td>
+        </tr>
+        
+        <tr>
+          <td>สวัสดิการอื่นๆ :</td>
+          <td>0.00</td>
+        </tr>
+        
+        <tr>
+          <td>ยอดเป้า</td>
+          <td>0.00</td>
+        </tr>
+        
+        <tr>
+          <td>โบนัส :</td>
+          <td>0.00</td>
+        </tr>
+        
+        <tr class="totals">
+          <td>Total Earnings</td>
+          <td>20,809.60</td>
+        </tr>
+      </table>
+
+      <!-- Deductions -->
+      <div class="section-title">Deductions</div>
+      <table>
+        <tr>
+          <th>Description</th>
+          <th>Amount (THB)</th>
+        </tr>
+        
+        <tr>
+          <td>เบิก :</td>
+          <td>6,000.00</td>
+        </tr>
+        
+        <tr>
+          <td>ประกันสังคม :</td>
+          <td>750.00</td>
+        </tr>
+        
+        <tr>
+          <td>จ่ายเงินกู้ :</td>
+          <td>0.00</td>
+        </tr>
+        
+        <tr>
+          <td>สาย :</td>
+          <td>0.00</td>
+        </tr>
+        
+        <tr>
+          <td>ลา :</td>
+          <td>0.00</td>
+        </tr>
+        
+        <tr>
+          <td>หนี้ :</td>
+          <td>0.00</td>
+        </tr>
+        
+        <tr class="totals">
+          <td>Total Deductions</td>
+          <td>6,750.00</td>
+        </tr>
+      </table>
+
+      <!-- Details -->
+      <div class="details-title">Details</div>
+      <table>
+        <tr>
+          <th>Description</th>
+          <th>Amount (THB)</th>
+        </tr>
+        
+        <tr>
+          <td>ขาด :</td>
+          <td>0.00</td>
+        </tr>
+        
+        <tr>
+          <td>สาย</td>
+          <td>0.00</td>
+        </tr>
+        
+        <tr>
+          <td>ลาป่วย :</td>
+          <td>0.00</td>
+        </tr>
+        
+        <tr>
+          <td>ลากิจ :</td>
+          <td>0.00</td>
+        </tr>
+        
+        <tr>
+          <td>ลาพักร้อน :</td>
+          <td>0.00</td>
+        </tr>
+        
+        <tr>
+          <td>OT (วัน) :</td>
+          <td>2.00</td>
+        </tr>
+        
+        <tr>
+          <td>OT (ชั่วโมง) :</td>
+          <td>0.00</td>
+        </tr>
+        
+        <tr>
+          <td>OT (ชั่วโมงวันขัตฤกษ์)</td>
+          <td>0.00</td>
+        </tr>
+        
+        <tr>
+          <td>เงินกู้ค้างชำระ :</td>
+          <td>0.00</td>
+        </tr>
+        
+      </table>
+
+      <!-- Net Pay -->
+      <div class="section-title">Net Pay</div>
+      <table>
+        <tr class="totals">
+          <td>รายได้สุทธิ :</td>
+          <td>14,060.00</td>
+        </tr>
+      </table>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p>Slip generated on</p>
+        <p>This is a system-generated document. No signature is required.</p>
+      </div>
+    </div>
+  </body>
+</html>

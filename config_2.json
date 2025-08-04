@@ -1,0 +1,148 @@
+{
+  "haris_slip_details": {
+    "company": {
+      "name": "Haris premium buffet",
+      "address": "บริษัท ไอแอมฟู้ด จำกัด",
+      "ID": "0125562015764"
+    },
+    "earnings": {
+      "label_key": "earnings",
+      "fields": [
+        {
+          "key": "อัตราเงินเดือน",
+          "label_key": "salary",
+          "display": true
+        },
+        {
+          "key": "ค่าตำแหน่ง",
+          "label_key": "positionallowance",
+          "display": true
+        },
+        {
+          "key": "โอที/วัน",
+          "label_key": "otd",
+          "display": true
+        },
+        {
+          "key": "โอที/ชม.",
+          "label_key": "oth",
+          "display": true
+        },
+        {
+          "key": "โอที/ชม. X 3",
+          "label_key": "otho",
+          "display": true
+        },
+        {
+          "key": "เบี้ยขยัน",
+          "label_key": "diligenceallowance",
+          "display": true
+        },
+        {
+          "key": "สวัสดิการอื่นๆ",
+          "label_key": "welfare",
+          "display": true
+        },
+        {
+          "key": "ยอดเป้า",
+          "label_key": "target",
+          "display": true
+        },
+        {
+          "key": "โบนัส",
+          "label_key": "bonus",
+          "display": true
+        }
+      ]
+    },
+    "deduction": {
+      "label_key": "deduction",
+      "fields": [
+        {
+          "key": "เบิก",
+          "label_key": "advance",
+          "display": true
+        },
+        {
+          "key": "ปกส.",
+          "label_key": "social",
+          "display": true
+        },
+        {
+          "key": "ยอดจ่ายเงินกู้",
+          "label_key": "repayment",
+          "display": true
+        },
+        {
+          "key": "สาย",
+          "label_key": "late",
+          "display": true
+        },
+        {
+          "key": "ลา",
+          "label_key": "leave",
+          "display": true
+        },
+        {
+          "key": "หนี้",
+          "label_key": "debt",
+          "display": true
+        }
+      ]
+    },
+    "details": {
+      "label_key": "details",
+      "fields": [
+        {
+          "key": "ขาด (วัน)",
+          "label_key": "absent",
+          "display": true
+        },
+        {
+          "key": "สาย (นาที)",
+          "label_key": "สาย",
+          "display": true
+        },
+        {
+          "key": "ลาป่วย (วัน)",
+          "label_key": "sick",
+          "display": true
+        },
+        {
+          "key": "ลากิจ (วัน)",
+          "label_key": "personal",
+          "display": true
+        },
+        {
+          "key": "ลาพักร้อน (วัน)",
+          "label_key": "vacation",
+          "display": true
+        },
+        {
+          "key": "OT (วัน)",
+          "label_key": "otd_detail",
+          "display": true
+        },
+        {
+          "key": "ค่าล่วงเวลา (ชั่วโมง)",
+          "label_key": "oth_detail",
+          "display": true
+        },
+        {
+          "key": "ค่าล่วงเวลา (ชั่วโมง) คูณ 3",
+          "label_key": "otho_detail",
+          "display": true
+        },
+        {
+          "key": "เงินกู้ค้าง",
+          "label_key": "loan",
+          "display": true
+        }
+      ]
+    },
+    "total": {
+      "key": "รายได้สุทธิ",
+      "label_key": "net"
+    }
+  }
+}
