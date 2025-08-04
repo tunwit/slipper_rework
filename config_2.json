@@ -2,7 +2,7 @@
   "haris_slip_details": {
     "company": {
       "name": "Haris premium buffet",
-      "address": "บริษัท ไอแอมฟู้ด จำกัด",
+      "address": "บริษัท ไอแอมฟู้ด จำกัด\n63/34 ถนนเลี่ยงเมืองปากเกร็ด ตำบลบางตลาด อ.ปากเกร็ด เทศบาลนครนนทบุรี จ.นนทบุรี 11120",
       "ID": "0125562015764"
     },
     "earnings": {
@@ -11,47 +11,56 @@
         {
           "key": "อัตราเงินเดือน",
           "label_key": "salary",
-          "display": true
+          "display": false,
+          "unit_key": "฿"
         },
         {
           "key": "ค่าตำแหน่ง",
           "label_key": "positionallowance",
-          "display": true
+          "display": false,
+          "unit_key": "฿"
         },
         {
           "key": "โอที/วัน",
           "label_key": "otd",
-          "display": true
+          "display": false,
+          "unit_key": "฿"
         },
         {
           "key": "โอที/ชม.",
           "label_key": "oth",
-          "display": true
+          "display": false,
+          "unit_key": "฿"
         },
         {
           "key": "โอที/ชม. X 3",
           "label_key": "otho",
-          "display": true
+          "display": false,
+          "unit_key": "฿"
         },
         {
           "key": "เบี้ยขยัน",
           "label_key": "diligenceallowance",
-          "display": true
+          "display": false,
+          "unit_key": "฿"
         },
         {
           "key": "สวัสดิการอื่นๆ",
           "label_key": "welfare",
-          "display": true
+          "display": false,
+          "unit_key": "฿"
         },
         {
           "key": "ยอดเป้า",
           "label_key": "target",
-          "display": true
+          "display": true,
+          "unit_key": "฿"
         },
         {
           "key": "โบนัส",
           "label_key": "bonus",
-          "display": true
+          "display": true,
+          "unit_key": "฿"
         }
       ]
     },
@@ -61,32 +70,38 @@
         {
           "key": "เบิก",
           "label_key": "advance",
-          "display": true
+          "display": true,
+          "unit_key": "฿"
         },
         {
           "key": "ปกส.",
           "label_key": "social",
-          "display": true
+          "display": true,
+          "unit_key": "฿"
         },
         {
           "key": "ยอดจ่ายเงินกู้",
           "label_key": "repayment",
-          "display": true
+          "display": true,
+          "unit_key": "฿"
         },
         {
           "key": "สาย",
           "label_key": "late",
-          "display": true
+          "display": true,
+          "unit_key": "฿"
         },
         {
           "key": "ลา",
           "label_key": "leave",
-          "display": true
+          "display": true,
+          "unit_key": "฿"
         },
         {
           "key": "หนี้",
           "label_key": "debt",
-          "display": true
+          "display": true,
+          "unit_key": "฿"
         }
       ]
     },
@@ -96,53 +111,63 @@
         {
           "key": "ขาด (วัน)",
           "label_key": "absent",
-          "display": true
+          "display": true,
+          "unit_key": "day"
         },
         {
           "key": "สาย (นาที)",
           "label_key": "สาย",
-          "display": true
+          "display": true,
+          "unit_key": "minute"
         },
         {
           "key": "ลาป่วย (วัน)",
           "label_key": "sick",
-          "display": true
+          "display": true,
+          "unit_key": "day"
         },
         {
           "key": "ลากิจ (วัน)",
           "label_key": "personal",
-          "display": true
+          "display": true,
+          "unit_key": "day"
         },
         {
           "key": "ลาพักร้อน (วัน)",
           "label_key": "vacation",
-          "display": true
+          "display": true,
+          "unit_key": "day"
         },
         {
           "key": "OT (วัน)",
           "label_key": "otd_detail",
-          "display": true
+          "display": true,
+          "unit_key": "day"
         },
         {
           "key": "ค่าล่วงเวลา (ชั่วโมง)",
           "label_key": "oth_detail",
-          "display": true
+          "display": true,
+          "unit_key": "hour"
         },
         {
           "key": "ค่าล่วงเวลา (ชั่วโมง) คูณ 3",
           "label_key": "otho_detail",
-          "display": true
+          "display": true,
+          "unit_key": "hour"
         },
         {
           "key": "เงินกู้ค้าง",
           "label_key": "loan",
-          "display": true
+          "display": true,
+          "unit_key": "฿"
         }
       ]
     },
     "total": {
       "key": "รายได้สุทธิ",
-      "label_key": "net"
+      "label_key": "net",
+      "unit_key": "฿"
     }
   }
 }

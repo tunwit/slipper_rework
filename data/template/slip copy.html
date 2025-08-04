@@ -4,10 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Salary Slip</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Noto+Sans+Thai:wght@100..900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <style>
@@ -18,7 +16,7 @@
       }
 
       body {
-        font-family: "Kanit", sans-serif;
+        font-family: "Inter", sans-serif;
         background: #f8fafc;
         padding: 10px;
         color: #1e293b;
@@ -252,16 +250,11 @@
           margin: 0.8cm;
         }
 
-        * {
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
-        }
-
         body {
           background: white;
           padding: 0;
           margin: 0;
-          font-size: 12px;
+          font-size: 11px;
         }
 
         .container {
@@ -298,10 +291,10 @@
           -webkit-print-color-adjust: exact;
         }
 
-        .footer {
-          font-size: 14px;
+        /* .footer {
+          font-size: 9px;
           padding: 8px 15px;
-        }
+        } */
 
         .section,
         .table-container,
@@ -336,33 +329,32 @@
     <div class="container">
       <div class="header">
         <div class="company-info">
-          <h1>Haris premium buffet</h1>
-          <p>บริษัท ไอแอมฟู้ด จำกัด
-63/34 ถนนเลี่ยงเมืองปากเกร็ด ตำบลบางตลาด อ.ปากเกร็ด เทศบาลนครนนทบุรี จ.นนทบุรี 11120</p>
-          <p><strong>Tax Id:</strong> 0125562015764</p>
+          <h1>{{ context.company.name }}</h1>
+          <p>{{ context.company.address }}</p>
+          <p><strong>Tax Id:</strong> {{ context.company.ID }}</p>
         </div>
-        <div class="slip-title">เอกสารเเจ้งเงินเดือน</div>
+        <div class="slip-title">SALARY SLIP</div>
       </div>
 
       <div class="content">
         <div class="section">
-          <div class="section-title">ข้อมูลพนักงาน</div>
+          <div class="section-title">Employee Information</div>
           <div class="info-grid">
             <div class="info-item">
-              <div class="info-label">รหัสพนังงาน</div>
-              <div class="info-value">1</div>
+              <div class="info-label">Employee ID</div>
+              <div class="info-value">{{ context.employee.id }}</div>
             </div>
             <div class="info-item">
-              <div class="info-label">ชื่อ</div>
-              <div class="info-value"> นางสาว ฟารีดา นิแห</div>
+              <div class="info-label">Full Name</div>
+              <div class="info-value">{{ context.employee.name }}</div>
             </div>
             <div class="info-item">
-              <div class="info-label">ตำแหน่ง</div>
-              <div class="info-value">หัวหน้าบริการ</div>
+              <div class="info-label">Position</div>
+              <div class="info-value">{{ context.employee.position }}</div>
             </div>
             <div class="info-item">
-              <div class="info-label">สาขา</div>
-              <div class="info-value">กัลปพฤกษ์</div>
+              <div class="info-label">Branch</div>
+              <div class="info-value">{{ context.employee.branch }}</div>
             </div>
           </div>
         </div>
@@ -370,58 +362,38 @@
         <!-- Horizontal Tables Layout -->
         <div class="tables-container">
           <!-- Earnings Table -->
-            
+          {% set earning_len = context.sections.earnings | length %} {% set
+          deduction_len = context.sections.deduction | length %} {% set diff =
+          deduction_len - earning_len %}
           <div class="table-section">
-            <div class="section-title">รายได้</div>
+            <div class="section-title">Earnings</div>
             <div class="table-container">
               <table>
                 <thead>
                   <tr>
-                    <th>รายการ</th>
-                    <th style="text-align: right">จำนวน (฿)</th>
+                    <th>Description</th>
+                    <th style="text-align: right">Amount (THB)</th>
                   </tr>
                 </thead>
                 <tbody>
-                  
+                  {% for item in context.sections.earnings %}
                   <tr>
-                    <td>ยอดเป้า</td>
+                    <td>{{ item.label }}</td>
                     <td style="text-align: right">
-                      0.00 ฿
+                      {{ "{:,.2f}".format(item.value) }} {{ item.unit }}
                     </td>
                   </tr>
-                  
-                  <tr>
-                    <td>โบนัส</td>
-                    <td style="text-align: right">
-                      0.00 ฿
-                    </td>
-                  </tr>
-                    
+                  {% endfor %} {% if diff > 0 %} {% for i in range(diff) %}
                   <tr>
                     <td>&nbsp;</td>
                     <td>&nbsp;</td>
                   </tr>
-                  
-                  <tr>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                  </tr>
-                  
-                  <tr>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                  </tr>
-                  
-                  <tr>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                  </tr>
-                   
+                  {% endfor %} {% endif %}
 
                   <tr class="totals">
-                    <td>รวมเงินได้</td>
+                    <td>Total Earnings</td>
                     <td style="text-align: right">
-                      0.00 ฿
+                      {{ "{:,.2f}".format(context.totals.earnings) }}
                     </td>
                   </tr>
                 </tbody>
@@ -430,65 +402,35 @@
           </div>
 
           <!-- Deductions Table -->
-          
+          {% set diff = earning_len - deduction_len %}
           <div class="table-section">
-            <div class="section-title">รายการหัก</div>
+            <div class="section-title">Deductions</div>
             <div class="table-container">
               <table>
                 <thead>
                   <tr>
-                    <th>รายการ</th>
-                    <th style="text-align: right">จำนวน (฿)</th>
+                    <th>Description</th>
+                    <th style="text-align: right">Amount (THB)</th>
                   </tr>
                 </thead>
                 <tbody>
-                  
+                  {% for item in context.sections.deduction %}
                   <tr>
-                    <td>เบิก</td>
+                    <td>{{ item.label }}</td>
                     <td style="text-align: right">
-                      1,500.00 ฿
+                      {{ "{:,.2f}".format(item.value) }} {{ item.unit }}
                     </td>
                   </tr>
-                  
+                  {% endfor %} {% if diff > 0 %} {% for i in range(diff) %}
                   <tr>
-                    <td>ประกันสังคม</td>
-                    <td style="text-align: right">
-                      750.00 ฿
-                    </td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
                   </tr>
-                  
-                  <tr>
-                    <td>จ่ายเงินกู้</td>
-                    <td style="text-align: right">
-                      0.00 ฿
-                    </td>
-                  </tr>
-                  
-                  <tr>
-                    <td>สาย</td>
-                    <td style="text-align: right">
-                      0.00 ฿
-                    </td>
-                  </tr>
-                  
-                  <tr>
-                    <td>ลา</td>
-                    <td style="text-align: right">
-                      0.00 ฿
-                    </td>
-                  </tr>
-                  
-                  <tr>
-                    <td>หนี้</td>
-                    <td style="text-align: right">
-                      988.00 ฿
-                    </td>
-                  </tr>
-                   
+                  {% endfor %} {% endif %}
                   <tr class="totals">
-                    <td>รวมรายการหัก</td>
+                    <td>Total Deductions</td>
                     <td style="text-align: right">
-                      3,238.00 ฿
+                      {{ "{:,.2f}".format(context.totals.deduction) }}
                     </td>
                   </tr>
                 </tbody>
@@ -499,80 +441,25 @@
 
         <!-- Additional Details Section -->
         <div class="section details-section">
-          <div class="section-title">รายละเอียดเพิ่มเติม</div>
+          <div class="section-title">Additional Details</div>
           <div class="details-table">
-            
+            {% for item in context.sections.details %}
             <div class="details-item">
-              <div class="label">ขาด</div>
+              <div class="label">{{ item.label }}</div>
               <div class="value">
-                0.00 วัน
+                {{ "{:,.2f}".format(item.value) }} {{ item.unit }}
               </div>
             </div>
-            
-            <div class="details-item">
-              <div class="label">สาย</div>
-              <div class="value">
-                0.00 นาที
-              </div>
-            </div>
-            
-            <div class="details-item">
-              <div class="label">ลาป่วย</div>
-              <div class="value">
-                2.00 วัน
-              </div>
-            </div>
-            
-            <div class="details-item">
-              <div class="label">ลากิจ</div>
-              <div class="value">
-                0.00 วัน
-              </div>
-            </div>
-            
-            <div class="details-item">
-              <div class="label">ลาพักร้อน</div>
-              <div class="value">
-                0.00 วัน
-              </div>
-            </div>
-            
-            <div class="details-item">
-              <div class="label">OT (วัน)</div>
-              <div class="value">
-                2.00 วัน
-              </div>
-            </div>
-            
-            <div class="details-item">
-              <div class="label">OT (ชั่วโมง)</div>
-              <div class="value">
-                0.00 ชั่วโมง
-              </div>
-            </div>
-            
-            <div class="details-item">
-              <div class="label">OT (ชั่วโมงวันขัตฤกษ์)</div>
-              <div class="value">
-                0.00 ชั่วโมง
-              </div>
-            </div>
-            
-            <div class="details-item">
-              <div class="label">เงินกู้ค้างชำระ</div>
-              <div class="value">
-                0.00 ฿
-              </div>
-            </div>
-            
+            {% endfor %}
           </div>
         </div>
 
         <div class="section">
           <div class="net-pay">
-            <div class="label">รายได้สุทธิ</div>
+            <div class="label">{{ context.sections.net.label }}</div>
             <div class="amount">
-              19,530.00 ฿
+              {{ "{:,.2f}".format(context.sections.net.value) }} {{
+              context.sections.net.unit }}
             </div>
           </div>
         </div>
@@ -584,8 +471,8 @@
       </div>
 
       <div class="footer">
-        <p><strong>สร้าง ณ วันที่ 04 August 2025 23:59:06</strong></p>
-        <p>หากต้องการสอบถาม กรุณาติดต่อเจ้าหน้าที่</p>
+        <p><strong>Slip generated on {{ context.timeStamp }}</strong></p>
+        <p>For inquiries, please contact HR department</p>
       </div>
     </div>
   </body>

@@ -142,8 +142,6 @@ class excel():
         for branch in data.keys():
             for _id in data[branch]:
                 employee_data = self.dfs[branch].loc[self.dfs[branch]["รหัสพนักงาน"] == _id].squeeze()
-                print(employee_data)
-                print(type(employee_data))
 
                 def t(key): 
                     l = self.get_lang(employee_data['ภาษา'].strip())
@@ -157,21 +155,35 @@ class excel():
                 }
 
                 earnings = [{"label" : t(field['label_key']),
-                             "value":employee_data[field['key']]} 
+                             "value":employee_data[field['key']],
+                             "unit": t(field["unit_key"])} 
                              for field in config['earnings']['fields'] if field['display']]
                 
                 deduction = [{"label" : t(field['label_key']),
-                             "value":employee_data[field['key']]} 
+                             "value":employee_data[field['key']],
+                             "unit": t(field["unit_key"])} 
                              for field in config['deduction']['fields'] if field['display']]
                 
                 details = [{"label" : t(field['label_key']),
-                             "value":employee_data[field['key']]} 
+                             "value":employee_data[field['key']],
+                             "unit": t(field["unit_key"])} 
                              for field in config['details']['fields'] if field['display']]
                 
-                net = {"label":t(config['total']['label_key']),"value":employee_data[config['total']['key']]}
+                net = {"label":t(config['total']['label_key']),
+                       "value":employee_data[config['total']['key']],
+                        "unit": t(config['total']["unit_key"])}
 
-                total_earnings = sum(item["value"] for item in earnings)
-                total_deduction = sum(item["value"] for item in deduction)
+                total_earnings = {
+                    "label":t('totale'),
+                    "value":sum(item["value"] for item in earnings),
+                    "unit": t('฿')
+                }
+
+                total_deduction = {
+                    "label":t('totled'),
+                    "value":sum(item["value"] for item in deduction),
+                    "unit": t('฿')
+                }
 
                 context = {
                 "company":config['company'],
@@ -185,10 +197,11 @@ class excel():
                 "totals": {
                      "earnings": total_earnings,
                     "deduction": total_deduction,
-                }
+                },
+                "timeStamp":datetime.now().strftime("%d %B %Y %H:%M:%S")
             }
                 print(context)
-                html_out = template.render(context=context)
+                html_out = template.render(context=context,t=t)
                 with open("outhtml.html", "w", encoding="utf-8") as f:
                     f.write(html_out)
                 return
