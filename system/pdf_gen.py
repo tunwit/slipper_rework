@@ -44,9 +44,9 @@ class excel():
         self.storage_dir = self.get_storage_dir()
         self.slip_dir = self.get_slip_dir()
         self.dfs = self.ex_to_df()
-        self.people = None
         self.call_back = None
         self.complete = False
+        self.total_rows = 0
 
     def ex_to_df(self):
         dfs = pd.read_excel(self.path,header=1,sheet_name=None)
@@ -81,7 +81,7 @@ class excel():
         return output
     
     def re_init(self):
-        self.people = None
+        self.total_rows = 0
         self.complete = False
 
     def get_lang(self,lang):
@@ -120,13 +120,13 @@ class excel():
         if self.call_back:
             data = {
                 'status':'complete'if self.complete else 'processing',
-                'all':len(self.people),
+                'all':self.total_rows,
             }
             if current:
                 data.update({'current':current})
             if index:
                 data.update({'index':index,
-                             'percentage':(index*100)/len(self.people)})
+                             'percentage':(index*100)/len(self.total_rows)})
             if index:
                 data.update({'branch':branch})
             self.call_back(data)
@@ -144,12 +144,12 @@ class excel():
         async def main():
             browser = await launch(headless=True,
                         executablePath=r"C:\Program Files\Google\Chrome\Application\chrome.exe",handleSIGINT=False,
-        handleSIGTERM=False,
-        handleSIGHUP=False,
-        dumpio=False, 
+                        handleSIGTERM=False,
+                        handleSIGHUP=False,
+                        dumpio=False, 
                         args=['--no-sandbox'])
             page = await browser.newPage()
-            await page.goto(r'file:///C:\Users\Admin\Desktop\wit\slipper_rework\out.html', waitUntil='networkidle0')
+            await page.goto(f'file:///{html_path}', waitUntil='networkidle0')
             await page.pdf({
                 'path': pdf_path,
                 'format': 'A4',
@@ -161,6 +161,22 @@ class excel():
             await browser.close()
 
         asyncio.run(main())
+
+    def createMetaData(self,storage_path,context,file_name):
+        meta_data = {
+            "employee_id": context['employee']['id'],
+            "employee_name": context['employee']['name'],
+            "email": context['employee']['email'],
+            "pay_period": context['payPeriod'],
+            "pdf_path": file_name+".pdf",
+            "html_path": file_name+".html",
+            "mail_sent": False,
+            "created_at": context['timeStamp']
+        }
+        json_file = os.path.join(storage_path,"metadata.json")
+        with open(json_file,'w',encoding="utf-8") as f:
+            json.dump(meta_data, f, ensure_ascii=False, indent=2)
+        
 
     def build_section(self,employee,employee_data,config,date_m,t):
         earnings = [{"label" : t(field['label_key']),
@@ -219,10 +235,10 @@ class excel():
         return context
         
     def extract_convert(self,data:dict,date_m:date):
-        print(self.dfs.keys())
         global creating
         creating = True
 
+        total_rows = sum(len(data) for df in data.values())
         self.re_init()
         env = Environment(loader=FileSystemLoader('data/template'))
         with open("config_2.json","r",encoding="utf8") as config:
@@ -233,7 +249,6 @@ class excel():
             self.mkdir(branch)
             for _id in data[branch]:
                 employee_data = self.dfs[branch].loc[self.dfs[branch]["รหัสพนักงาน"] == _id].squeeze()
-
                 def t(key): 
                     l = self.get_lang(employee_data['ภาษา'].strip())
                     return l.get(key,key)
@@ -242,24 +257,27 @@ class excel():
                     "name" : employee_data["ชื่อ-นามสกุล"],
                     "id": employee_data["รหัสพนักงาน"],
                     "position": employee_data["ตำแหน่ง"],
+                    "email":employee_data['Email'],
                     "branch":branch
                 }
                 
                 context = self.build_section(employee,employee_data,config,date_m,t)
                
                 html_out = template.render(context=context,t=t)
-                filename = f'{employee["id"]}_{employee['name']}'
-                path_strorage = os.path.join(self.storage_dir,branch,filename)
+                key = f'{employee["id"]}_{employee['name']}'
+                path_strorage = os.path.join(self.storage_dir,branch,key)
 
                 #create pay slip html
-                with open(path_strorage+".html",'w', encoding='utf-8') as f:
+                os.makedirs(path_strorage, exist_ok=True)
+                file_name = os.path.join(path_strorage,"pay_slip")
+                with open(file_name+".html",'w', encoding='utf-8') as f:
                     f.write(html_out)
                 
                 #create pay slip pdf
-                self.html_to_pdf_sync(path_strorage+".html",path_strorage+".pdf")
-
-                path_slip = os.path.join(self.slip_dir,branch,filename)
-                shutil.copy2(path_strorage+".pdf", path_slip+".pdf")
+                self.html_to_pdf_sync(file_name+".html",file_name+".pdf")
+                self.createMetaData(path_strorage,context,file_name)
+                path_slip = os.path.join(self.slip_dir,branch,key)
+                shutil.copy2(file_name+".pdf", path_slip+".pdf")
 
         self.complete = True
         self.progress()
