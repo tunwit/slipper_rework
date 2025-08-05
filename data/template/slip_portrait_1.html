@@ -4,8 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Salary Slip</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Noto+Sans+Thai:wght@100..900&display=swap"
       rel="stylesheet"
     />
     <style>
@@ -16,7 +18,7 @@
       }
 
       body {
-        font-family: "Inter", sans-serif;
+        font-family: "Kanit", sans-serif;
         background: #f8fafc;
         padding: 10px;
         color: #1e293b;
@@ -56,7 +58,7 @@
       }
 
       .slip-title {
-        font-size: 18px;
+        font-size: 20px;
         font-weight: 600;
         text-align: right;
       }
@@ -103,7 +105,7 @@
       }
 
       .info-value {
-        font-size: 12px;
+        font-size: 14px;
         font-weight: 600;
       }
 
@@ -146,7 +148,7 @@
       }
 
       td {
-        font-size: 14px;
+        font-size: 12px;
         padding: 6px 12px;
         border-bottom: 1px solid #f1f5f9;
         vertical-align: middle;
@@ -177,7 +179,7 @@
       .details-table {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 15px;
+        gap: 10px;
       }
 
       .details-item {
@@ -246,15 +248,26 @@
 
       @media print {
         @page {
-          size: A4 landscape;
-          margin: 0.8cm;
+          size: A4 portrait;
+          margin: 0.6cm;
+        }
+
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+
+        html,
+        body {
+          width: 210mm;
+          height: 297mm;
         }
 
         body {
           background: white;
           padding: 0;
           margin: 0;
-          font-size: 11px;
+          font-size: 12px;
         }
 
         .container {
@@ -291,10 +304,14 @@
           -webkit-print-color-adjust: exact;
         }
 
-        /* .footer {
-          font-size: 9px;
+        .footer {
+          font-size: 14px;
           padding: 8px 15px;
-        } */
+        }
+
+        .company-info p {
+          max-width: 300px;
+        }
 
         .section,
         .table-container,
@@ -331,29 +348,33 @@
         <div class="company-info">
           <h1>{{ context.company.name }}</h1>
           <p>{{ context.company.address }}</p>
-          <p><strong>Tax Id:</strong> {{ context.company.ID }}</p>
+          <p><strong>{{ t('tax_id') }}</strong> {{ context.company.ID }}</p>
         </div>
-        <div class="slip-title">SALARY SLIP</div>
+
+        <div>
+          <p class="slip-title">{{ t('payslip') }}</p>
+          <div>{{ context.payPeriod }}</div>
+        </div>
       </div>
 
       <div class="content">
         <div class="section">
-          <div class="section-title">Employee Information</div>
+          <div class="section-title">{{ t('employee_infomation') }}</div>
           <div class="info-grid">
             <div class="info-item">
-              <div class="info-label">Employee ID</div>
+              <div class="info-label">{{ t('employee_id') }}</div>
               <div class="info-value">{{ context.employee.id }}</div>
             </div>
             <div class="info-item">
-              <div class="info-label">Full Name</div>
+              <div class="info-label">{{ t('employee_name') }}</div>
               <div class="info-value">{{ context.employee.name }}</div>
             </div>
             <div class="info-item">
-              <div class="info-label">Position</div>
+              <div class="info-label">{{ t('employee_position') }}</div>
               <div class="info-value">{{ context.employee.position }}</div>
             </div>
             <div class="info-item">
-              <div class="info-label">Branch</div>
+              <div class="info-label">{{ t('employee_branch') }}</div>
               <div class="info-value">{{ context.employee.branch }}</div>
             </div>
           </div>
@@ -366,13 +387,13 @@
           deduction_len = context.sections.deduction | length %} {% set diff =
           deduction_len - earning_len %}
           <div class="table-section">
-            <div class="section-title">Earnings</div>
+            <div class="section-title">{{ t('earnings') }}</div>
             <div class="table-container">
               <table>
                 <thead>
                   <tr>
-                    <th>Description</th>
-                    <th style="text-align: right">Amount (THB)</th>
+                    <th>{{ t('description') }}</th>
+                    <th style="text-align: right">{{ t('amount') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -380,7 +401,7 @@
                   <tr>
                     <td>{{ item.label }}</td>
                     <td style="text-align: right">
-                      {{ "{:,.2f}".format(item.value) }} {{ item.unit }}
+                      {{ item.formatted }} {{ item.unit }}
                     </td>
                   </tr>
                   {% endfor %} {% if diff > 0 %} {% for i in range(diff) %}
@@ -391,9 +412,10 @@
                   {% endfor %} {% endif %}
 
                   <tr class="totals">
-                    <td>Total Earnings</td>
+                    <td>{{ context.totals.earnings.label }}</td>
                     <td style="text-align: right">
-                      {{ "{:,.2f}".format(context.totals.earnings) }}
+                      {{ context.totals.earnings.formatted }} {{
+                      context.totals.earnings.unit }}
                     </td>
                   </tr>
                 </tbody>
@@ -404,13 +426,13 @@
           <!-- Deductions Table -->
           {% set diff = earning_len - deduction_len %}
           <div class="table-section">
-            <div class="section-title">Deductions</div>
+            <div class="section-title">{{ t('deduction') }}</div>
             <div class="table-container">
               <table>
                 <thead>
                   <tr>
-                    <th>Description</th>
-                    <th style="text-align: right">Amount (THB)</th>
+                    <th>{{ t('description') }}</th>
+                    <th style="text-align: right">{{ t('amount') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -418,7 +440,7 @@
                   <tr>
                     <td>{{ item.label }}</td>
                     <td style="text-align: right">
-                      {{ "{:,.2f}".format(item.value) }} {{ item.unit }}
+                      {{ item.formatted }} {{ item.unit }}
                     </td>
                   </tr>
                   {% endfor %} {% if diff > 0 %} {% for i in range(diff) %}
@@ -428,9 +450,10 @@
                   </tr>
                   {% endfor %} {% endif %}
                   <tr class="totals">
-                    <td>Total Deductions</td>
+                    <td>{{ context.totals.deduction.label }}</td>
                     <td style="text-align: right">
-                      {{ "{:,.2f}".format(context.totals.deduction) }}
+                      {{ context.totals.deduction.formatted }} {{
+                      context.totals.deduction.unit }}
                     </td>
                   </tr>
                 </tbody>
@@ -441,14 +464,12 @@
 
         <!-- Additional Details Section -->
         <div class="section details-section">
-          <div class="section-title">Additional Details</div>
+          <div class="section-title">{{ t('details') }}</div>
           <div class="details-table">
             {% for item in context.sections.details %}
             <div class="details-item">
               <div class="label">{{ item.label }}</div>
-              <div class="value">
-                {{ "{:,.2f}".format(item.value) }} {{ item.unit }}
-              </div>
+              <div class="value">{{ item.formatted }} {{ item.unit }}</div>
             </div>
             {% endfor %}
           </div>
@@ -458,8 +479,8 @@
           <div class="net-pay">
             <div class="label">{{ context.sections.net.label }}</div>
             <div class="amount">
-              {{ "{:,.2f}".format(context.sections.net.value) }} {{
-              context.sections.net.unit }}
+              {{ context.sections.net.formatted }} {{ context.sections.net.unit
+              }}
             </div>
           </div>
         </div>
@@ -471,8 +492,8 @@
       </div>
 
       <div class="footer">
-        <p><strong>Slip generated on {{ context.timeStamp }}</strong></p>
-        <p>For inquiries, please contact HR department</p>
+        <p><strong>{{ t('generatedon') }} {{ context.timeStamp }}</strong></p>
+        <p>{{ t('contactHR') }}</p>
       </div>
     </div>
   </body>

@@ -161,8 +161,9 @@ class SlipMaker(MDScreen):
         self.progress_dialog.content_cls.add_widget(progress_bar)
         self.progress_dialog.open()
         self.excel_object.call_back = self.call_back_create_slip
-        thread = threading.Thread(target=self.excel_object.extract_convert, args=(self.going_to_make_slip,value,))
-        thread.start()
+        # thread = threading.Thread(target=self.excel_object.extract_convert, args=(self.going_to_make_slip,value,))
+        # thread.start()
+        self.excel_object.extract_convert(self.going_to_make_slip,value)
         gmail_interval.cancel()
         employee_interval.cancel()
 

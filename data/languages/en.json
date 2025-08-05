@@ -94,6 +94,8 @@
   "day": "day",
   "minute": "นาที",
   "hour": "hour",
-  "generatedon":"Slip generated on",
-  "contactHR":"For inquiries, please contact HR department"
+  "generatedon": "Slip generated on",
+  "contactHR": "For inquiries, please contact HR department",
+  "pay_period": "Pay Period",
+  "tax_id": "Tax Id"
 }
