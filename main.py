@@ -43,6 +43,7 @@ from system.send_mail import send_email
 from system.pdf_gen import excel 
 from system.pdf_gen import creating
 from pathlib import Path
+import uuid
 import pandas as pd
 
 """
@@ -102,6 +103,7 @@ class list_container(IRightBodyTouch, MDBoxLayout):
 class SlipMaker(MDScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.updating_checkboxes = False
 
     def on_start(self):
         pass
@@ -122,6 +124,12 @@ class SlipMaker(MDScreen):
         gmail_interval()
         self.progress_dialog.title = "Complete !!"
         self.progress_dialog.dismiss()
+        self.going_to_make_slip = {}
+
+        for id_key, widget in self.ids.items():
+            if 'checkbox_maker_' in id_key and hasattr(widget, 'active'):
+                widget.active = False
+                
         snackbar = MDSnackbar(
                 MDLabel(
                 text="Dowload Complete !",
@@ -137,7 +145,7 @@ class SlipMaker(MDScreen):
 
     def update_progress_slip_bar(self, data):
         self.ids['progress_slip_bar'].value = data['percentage']
-        self.ids['label_slip'].text = f"{int(data['percentage'])}% creating file for {data['branch']}/{data['current']}"
+        self.ids['label_slip'].text = f"{int(data['percentage'])}% creating {data['file']} file for {data['branch']}/{data['current']}"
 
     def start_creating_slip(self, instance, value:date, date_range):
         self.progress_dialog = MDDialog(
@@ -161,9 +169,9 @@ class SlipMaker(MDScreen):
         self.progress_dialog.content_cls.add_widget(progress_bar)
         self.progress_dialog.open()
         self.excel_object.call_back = self.call_back_create_slip
-        # thread = threading.Thread(target=self.excel_object.extract_convert, args=(self.going_to_make_slip,value,))
-        # thread.start()
-        self.excel_object.extract_convert(self.going_to_make_slip,value)
+        thread = threading.Thread(target=self.excel_object.extract_convert, args=(self.going_to_make_slip,value,))
+        thread.start()
+        # self.excel_object.extract_convert(self.going_to_make_slip,value)
         gmail_interval.cancel()
         employee_interval.cancel()
 
@@ -204,46 +212,44 @@ class SlipMaker(MDScreen):
         )
         self.confirm_makeslip_dialog.open()
     
-    def individual_selected(self,button:MDCheckbox,pos):
-        expandable = button.parent.parent.parent.parent.parent
-        branch_text = expandable.panel_cls.text
-        name_text = button.parent.parent.parent.text
+    def individual_selected(self,button:MDCheckbox,val):
+        if self.updating_checkboxes:
+            return
         
-        pattern = r'\[size=\d+\](.*?)\[/size\]'
-        result = re.search(pattern, name_text)
-        _id = result.group(1).split('|')[0].strip()
+        branch = getattr(button, 'branch', None)
+        emp_id = getattr(button, 'emp_id', None)
+        if not branch or not emp_id:
+            return
 
-
-        result = re.search(pattern, branch_text)
-        branch = result.group(1).strip()
-
-        if button.active:
-            if branch not in self.going_to_make_slip:
-                self.going_to_make_slip[branch] = []
-            self.going_to_make_slip[branch].append(_id)
+        if val:
+            self.going_to_make_slip.setdefault(branch, []).append(emp_id)
         else:
             try:
-                self.going_to_make_slip[branch].remove(_id)
-            except:pass
+                self.going_to_make_slip[branch].remove(emp_id)
+            except Exception as e:print(e)
 
-        true_state = len(self.going_to_make_slip)
-        self.ids['number'].text = str(true_state)
-        if true_state > 0:
-            self.ids.create_slip.disabled=False
-        else:
-            self.ids.create_slip.disabled=True
+        self.update_selected_stat()
 
-        if true_state == self.total_individual_checkbox:
-            self.ids.all_select.active = True
-        else:
-            self.ids.all_select.active = False
-
+    def update_selected_stat(self):
+        total_selected = sum(len(v) for v in self.going_to_make_slip.values())
+        self.ids['number'].text = str(total_selected)
+        self.ids.create_slip.disabled = total_selected <= 0
+        self.ids.all_select.active = total_selected == self.total_individual_checkbox
 
     def all_selected(self,button:MDRaisedButton):
+        self.updating_checkboxes = True
         state = button.active
-        for ids in self.ids: 
-            if 'checkbox_maker_' in ids:
-                self.ids[ids].active = state
+        self.going_to_make_slip.clear()
+        for id_key, widget in self.ids.items():
+            if 'checkbox_maker_' in id_key and hasattr(widget, 'active'):
+                widget.active = state
+                branch = getattr(widget, 'branch', None)
+                emp_id = getattr(widget, 'emp_id', None)
+                if state:
+                    self.going_to_make_slip.setdefault(branch, []).append(emp_id)
+
+        self.update_selected_stat()
+        self.updating_checkboxes = False
 
     def create_employee_list(self,dt):
         fram1 = MDBoxLayout(
@@ -318,8 +324,10 @@ class SlipMaker(MDScreen):
                 check = list_container()
                 checkbox = MDCheckbox()
                 checkbox.bind(active=self.individual_selected)
+                checkbox.branch = branchName
+                checkbox.emp_id = employee['รหัสพนักงาน']
                 self.total_individual_checkbox += 1
-                self.ids[f"checkbox_maker_{datetime.now().strftime('%f')}"] = checkbox
+                self.ids[f"checkbox_maker_{uuid.uuid4().hex}"] = checkbox
                 checkbox.color_active = self.theme_cls.accent_light
                 item.add_widget(face)
                 check.add_widget(checkbox)
@@ -810,7 +818,7 @@ class Employee(MDScreen):
                         item = CustomOneLineAvatarIconListItem(
                             text=f"[size=20]{num}.{name}   |   {email}   |   Salary of [b]{ofmonth}[/b]   [color=9C9B9B]Create at {datetime.strptime(createat,'%d%m%y%H%M%S').strftime('%d/%m/%y %H:%M')}[/color][/size]",
                             font_style = "sarabun",
-                            path= os.path.join('slip',SHOP_NAME,branch,filename),
+                            path = os.path.join('slip',SHOP_NAME,branch,filename),
                             email=filename.split(',')[1],
                             name=filename.split(',')[0],
                             branch=branch,
@@ -883,13 +891,20 @@ class SliperApp(MDApp):
         return screen
     
     def on_start(self):
-       if not os.path.exists(f'slip'):
+        if not os.path.exists(f'slip'):
             os.mkdir(f'slip')
 
-       if not os.path.exists(f'slip/{SHOP_NAME}'):
+        if not os.path.exists(f'storage'):
+            os.mkdir(f'storage')
+
+        if not os.path.exists(f'slip/{SHOP_NAME}'):
             os.mkdir(f'slip/{SHOP_NAME}')
-       sc_lst = self.root.ids.mana.screen_names
-       for screen in sc_lst:
+        
+        if not os.path.exists(f'storage/{SHOP_NAME}'):
+            os.mkdir(f'storage/{SHOP_NAME}')
+
+        sc_lst = self.root.ids.mana.screen_names
+        for screen in sc_lst:
            self.root.ids.mana.get_screen(screen).on_start()
 
 

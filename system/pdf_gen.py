@@ -5,7 +5,7 @@ p.start()
 
 import os
 import json
-import time
+from pathlib import Path
 import time
 from datetime import date
 from datetime import datetime
@@ -19,6 +19,7 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 import asyncio
 from pyppeteer import launch
+import threading
 
 creating = False
 
@@ -47,6 +48,8 @@ class excel():
         self.call_back = None
         self.complete = False
         self.total_rows = 0
+        self.jobs = []
+        self.progress_percent = 0
 
     def ex_to_df(self):
         dfs = pd.read_excel(self.path,header=1,sheet_name=None)
@@ -60,24 +63,24 @@ class excel():
         cleaned_dfs = {}
         for sheet_name, df in dfs.items():
             df.columns.values[0] = "รหัสพนักงาน"
-
+    
             if "รหัสพนักงาน" in df.columns and "ชื่อ-นามสกุล" in df.columns:
-                first_col = df.columns[0]
-                df[first_col] = df[first_col].astype(pd.Int64Dtype()).astype(str)
-                df.fillna(0, inplace=True)
-                print(df.head())
                 new_name = sheet_name.replace("D", "", 1)  # remove only the first "D"
                 cleaned_dfs[new_name] = df.dropna(subset=["รหัสพนักงาน", "ชื่อ-นามสกุล"])
+                first_col = cleaned_dfs[new_name].columns[0]
+                cleaned_dfs[new_name][first_col] = cleaned_dfs[new_name][first_col].astype(pd.Int64Dtype()).astype(str)
+                cleaned_dfs[new_name].fillna(0, inplace=True)
 
-
+        print(cleaned_dfs)
         return cleaned_dfs
     
     def get_storage_dir(self):
-        output = Path(f"{os.getcwd()}\storage\{SHOP_NAME}")
+        output = Path.cwd() / "storage" / SHOP_NAME
+
         return output
     
     def get_slip_dir(self):
-        output = Path(f"{os.getcwd()}\slip\{SHOP_NAME}")
+        output = Path.cwd() / "slip" / SHOP_NAME
         return output
     
     def re_init(self):
@@ -85,11 +88,12 @@ class excel():
         self.complete = False
 
     def get_lang(self,lang):
+        path = Path.cwd() / "data" / "languages"
         try:
-            with open(f"data\\languages\\{lang}.json", "r", encoding='utf-8') as json_file:
+            with open(path / f"{lang}.json", "r", encoding='utf-8') as json_file:
                 data = json.load(json_file)
         except FileNotFoundError:
-            with open(f"data\\languages\\th.json", "r", encoding='utf-8') as json_file:
+            with open(path / "th.json", "r", encoding='utf-8') as json_file:
                 data = json.load(json_file)
         return data
     
@@ -98,36 +102,30 @@ class excel():
         if result == None or result == '0':
             result = "-"
         return result
-    
+
     def get_round(self,branch):
         return self.dfs[branch].shape[0]
-
     
-    def get_all_round(self):
-        i=0
-        for sheet in self.sources:
-            salib = self.get_round(sheet)
-            i += salib
-        return i
 
     def mkdir(self,branch):
-            if not os.path.exists(os.path.join(self.slip_dir,branch)):
-                os.makedirs(os.path.join(self.slip_dir,branch))
-            if not os.path.exists(os.path.join(self.storage_dir,branch)):
-                os.makedirs(os.path.join(self.storage_dir,branch))
+            if not os.path.exists(self.slip_dir / branch):
+                os.makedirs(self.slip_dir / branch)
+            if not os.path.exists(self.storage_dir / branch):
+                os.makedirs(self.storage_dir / branch)
 
-    def progress(self,index=None,current=None,branch=None):
+    def progress(self,current=None,branch=None,file='html'):
+        self.progress_percent+=1
         if self.call_back:
             data = {
                 'status':'complete'if self.complete else 'processing',
-                'all':self.total_rows,
+                'file':file,
+                'all':self.total_rows*2,
             }
             if current:
                 data.update({'current':current})
-            if index:
-                data.update({'index':index,
-                             'percentage':(index*100)/len(self.total_rows)})
-            if index:
+            print(f'{self.progress_percent} |{self.total_rows*2}')
+            data.update({'percentage':(self.progress_percent*100)/(self.total_rows*2)})
+            if branch:
                 data.update({'branch':branch})
             self.call_back(data)
 
@@ -140,27 +138,61 @@ class excel():
         else:
             return f"{value}"
     
-    def html_to_pdf_sync(self,html_path, pdf_path):
-        async def main():
+    async def render_to_pdf(self,semaphore,browser, html_path, pdf_path, path_storage, context):
+        async with semaphore:
+                page = await browser.newPage()
+                await page.goto(f'file:///{html_path}', waitUntil='networkidle0')
+                await page.pdf({
+                    'path': pdf_path,
+                    'format': 'A4',
+                    'landscape': True,
+                    'printBackground': True,
+                    'preferCSSPageSize': True,
+                    'margin': {'top': '10mm', 'bottom': '10mm', 'left': '10mm', 'right': '10mm'},
+                })
+                #create pay slip pdf
+                file_name = path_storage / "pay_slip"
+                self.createMetaData(path_storage,context,file_name)
+                key = f'{context['employee']["id"]}_{context['employee']['name']}'
+                path_slip = self.slip_dir / context['employee']['branch'] / key
+                shutil.copy2(file_name.with_suffix(".pdf"), path_slip.with_suffix(".pdf"))
+                self.progress(current=context['employee']["name"],branch=context['employee']['branch'],file='pdf')
+
+    async def html_to_pdf_batch(self):
+            if os.name == 'nt':
+                exe = Path("C:\Program Files\Google\Chrome\Application\chrome.exe")
+            else:
+                exe = Path(r"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
             browser = await launch(headless=True,
-                        executablePath=r"C:\Program Files\Google\Chrome\Application\chrome.exe",handleSIGINT=False,
+                        executablePath=exe,handleSIGINT=False,
                         handleSIGTERM=False,
                         handleSIGHUP=False,
                         dumpio=False, 
                         args=['--no-sandbox'])
-            page = await browser.newPage()
-            await page.goto(f'file:///{html_path}', waitUntil='networkidle0')
-            await page.pdf({
-                'path': pdf_path,
-                'format': 'A4',
-                'landscape': True,
-                'printBackground': True,
-                'preferCSSPageSize': True,
-                'margin': {'top': '10mm', 'bottom': '10mm', 'left': '10mm', 'right': '10mm'},
-            })
+            semaphore = asyncio.Semaphore(5)
+            tasks = []
+            for html_path, pdf_path, path_storage, context in self.jobs:
+                task = self.render_to_pdf(semaphore,browser, html_path, pdf_path, path_storage, context)
+                tasks.append(task)
+            # for html_path, pdf_path, path_strorage, context in self.jobs:
+            #     await page.goto(f'file:///{html_path}', waitUntil='networkidle0')
+            #     await page.pdf({
+            #         'path': pdf_path,
+            #         'format': 'A4',
+            #         'landscape': True,
+            #         'printBackground': True,
+            #         'preferCSSPageSize': True,
+            #         'margin': {'top': '10mm', 'bottom': '10mm', 'left': '10mm', 'right': '10mm'},
+            #     })
+            #     #create pay slip pdf
+            #     file_name = path_strorage / "pay_slip"
+            #     self.createMetaData(path_strorage,context,file_name)
+            #     key = f'{context['employee']["id"]}_{context['employee']['name']}'
+            #     path_slip = self.slip_dir / context['employee']['branch'] / key
+            #     shutil.copy2(file_name.with_suffix(".pdf"), path_slip.with_suffix(".pdf"))
+            await asyncio.gather(*tasks)
             await browser.close()
 
-        asyncio.run(main())
 
     def createMetaData(self,storage_path,context,file_name):
         meta_data = {
@@ -168,12 +200,12 @@ class excel():
             "employee_name": context['employee']['name'],
             "email": context['employee']['email'],
             "pay_period": context['payPeriod'],
-            "pdf_path": file_name+".pdf",
-            "html_path": file_name+".html",
+            "pdf_path": str(file_name.with_suffix(".pdf")),
+            "html_path": str(file_name.with_suffix(".html")),
             "mail_sent": False,
             "created_at": context['timeStamp']
         }
-        json_file = os.path.join(storage_path,"metadata.json")
+        json_file = storage_path / "metadata.json"
         with open(json_file,'w',encoding="utf-8") as f:
             json.dump(meta_data, f, ensure_ascii=False, indent=2)
         
@@ -233,25 +265,36 @@ class excel():
         "timeStamp":datetime.now().strftime("%d %B %Y %H:%M:%S")
         }
         return context
-        
+    
     def extract_convert(self,data:dict,date_m:date):
         global creating
         creating = True
 
-        total_rows = sum(len(data) for df in data.values())
         self.re_init()
+        self.total_rows = sum(len(df) for df in data.values())
         env = Environment(loader=FileSystemLoader('data/template'))
         with open("config_2.json","r",encoding="utf8") as config:
             config = json.load(config)['haris_slip_details']
 
         template = env.get_template(config['template'])
+
+        #pre load langauge
+        lang_th = self.get_lang('th')
+        lang_en = self.get_lang('en')
+
         for branch in data.keys():
             self.mkdir(branch)
+            df_map = {row["รหัสพนักงาน"]: row for _, row in self.dfs[branch].iterrows()}
             for _id in data[branch]:
-                employee_data = self.dfs[branch].loc[self.dfs[branch]["รหัสพนักงาน"] == _id].squeeze()
-                def t(key): 
-                    l = self.get_lang(employee_data['ภาษา'].strip())
-                    return l.get(key,key)
+                employee_data = df_map[_id]
+
+                if employee_data['ภาษา'] == 'th':
+                    lang = lang_th
+                else:
+                    lang = lang_en
+
+                def t(key):
+                    return lang.get(key, key)
                 
                 employee = {
                     "name" : employee_data["ชื่อ-นามสกุล"],
@@ -265,23 +308,22 @@ class excel():
                
                 html_out = template.render(context=context,t=t)
                 key = f'{employee["id"]}_{employee['name']}'
-                path_strorage = os.path.join(self.storage_dir,branch,key)
+                path_strorage = self.storage_dir / branch / key 
 
                 #create pay slip html
                 os.makedirs(path_strorage, exist_ok=True)
-                file_name = os.path.join(path_strorage,"pay_slip")
-                with open(file_name+".html",'w', encoding='utf-8') as f:
+                file_name = path_strorage / "pay_slip"
+                with open(file_name.with_suffix(".html"),'w', encoding='utf-8') as f:
                     f.write(html_out)
                 
-                #create pay slip pdf
-                self.html_to_pdf_sync(file_name+".html",file_name+".pdf")
-                self.createMetaData(path_strorage,context,file_name)
-                path_slip = os.path.join(self.slip_dir,branch,key)
-                shutil.copy2(file_name+".pdf", path_slip+".pdf")
+                self.jobs.append((file_name.with_suffix(".html"), file_name.with_suffix(".pdf"),path_strorage,context))
+                self.progress(current=employee["name"],branch=branch)
 
+        asyncio.run(self.html_to_pdf_batch())
         self.complete = True
         self.progress()
         creating = False
+        self.progress_percent = 0
 
         # for df in self.dfs:
         #     for i in self.temporary.sheetnames:
