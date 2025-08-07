@@ -71,7 +71,6 @@ class excel():
                 cleaned_dfs[new_name][first_col] = cleaned_dfs[new_name][first_col].astype(pd.Int64Dtype()).astype(str)
                 cleaned_dfs[new_name].fillna(0, inplace=True)
 
-        print(cleaned_dfs)
         return cleaned_dfs
     
     def get_storage_dir(self):
@@ -123,7 +122,6 @@ class excel():
             }
             if current:
                 data.update({'current':current})
-            print(f'{self.progress_percent} |{self.total_rows*2}')
             data.update({'percentage':(self.progress_percent*100)/(self.total_rows*2)})
             if branch:
                 data.update({'branch':branch})
@@ -140,23 +138,23 @@ class excel():
     
     async def render_to_pdf(self,semaphore,browser, html_path, pdf_path, path_storage, context):
         async with semaphore:
-                page = await browser.newPage()
-                await page.goto(f'file:///{html_path}', waitUntil='networkidle0')
-                await page.pdf({
-                    'path': pdf_path,
-                    'format': 'A4',
-                    'landscape': True,
-                    'printBackground': True,
-                    'preferCSSPageSize': True,
-                    'margin': {'top': '10mm', 'bottom': '10mm', 'left': '10mm', 'right': '10mm'},
-                })
-                #create pay slip pdf
-                file_name = path_storage / "pay_slip"
-                self.createMetaData(path_storage,context,file_name)
-                key = f'{context['employee']["id"]}_{context['employee']['name']}'
-                path_slip = self.slip_dir / context['employee']['branch'] / key
-                shutil.copy2(file_name.with_suffix(".pdf"), path_slip.with_suffix(".pdf"))
-                self.progress(current=context['employee']["name"],branch=context['employee']['branch'],file='pdf')
+            page = await browser.newPage()
+            await page.goto(f'file:///{html_path}', waitUntil='networkidle0')
+            await page.pdf({
+                'path': pdf_path,
+                'format': 'A4',
+                'landscape': True,
+                'printBackground': True,
+                'preferCSSPageSize': True,
+                'margin': {'top': '10mm', 'bottom': '10mm', 'left': '10mm', 'right': '10mm'},
+            })
+            #create pay slip pdf
+            file_name = path_storage / "pay_slip"
+            self.createMetaData(path_storage,context,file_name)
+            key = f'{context['employee']["id"]}_{context['employee']['name']}'.strip()
+            path_slip = self.slip_dir / context['employee']['branch'] / key
+            shutil.copy2(file_name.with_suffix(".pdf"), path_slip.with_suffix(".pdf"))
+            self.progress(current=context['employee']["name"],branch=context['employee']['branch'],file='pdf')
 
     async def html_to_pdf_batch(self):
             if os.name == 'nt':
@@ -174,22 +172,6 @@ class excel():
             for html_path, pdf_path, path_storage, context in self.jobs:
                 task = self.render_to_pdf(semaphore,browser, html_path, pdf_path, path_storage, context)
                 tasks.append(task)
-            # for html_path, pdf_path, path_strorage, context in self.jobs:
-            #     await page.goto(f'file:///{html_path}', waitUntil='networkidle0')
-            #     await page.pdf({
-            #         'path': pdf_path,
-            #         'format': 'A4',
-            #         'landscape': True,
-            #         'printBackground': True,
-            #         'preferCSSPageSize': True,
-            #         'margin': {'top': '10mm', 'bottom': '10mm', 'left': '10mm', 'right': '10mm'},
-            #     })
-            #     #create pay slip pdf
-            #     file_name = path_strorage / "pay_slip"
-            #     self.createMetaData(path_strorage,context,file_name)
-            #     key = f'{context['employee']["id"]}_{context['employee']['name']}'
-            #     path_slip = self.slip_dir / context['employee']['branch'] / key
-            #     shutil.copy2(file_name.with_suffix(".pdf"), path_slip.with_suffix(".pdf"))
             await asyncio.gather(*tasks)
             await browser.close()
 
@@ -307,7 +289,7 @@ class excel():
                 context = self.build_section(employee,employee_data,config,date_m,t)
                
                 html_out = template.render(context=context,t=t)
-                key = f'{employee["id"]}_{employee['name']}'
+                key = f'{employee["id"]}_{employee['name']}'.strip()
                 path_strorage = self.storage_dir / branch / key 
 
                 #create pay slip html

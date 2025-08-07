@@ -79,17 +79,17 @@ class send_email():
         msg = MIMEMultipart()
         msg['From'] = FROM_EMAIL
         msg['To'] = person['email']
-        msg['subject'] = f'สลิปเงินเดือนของ {person["name"]}'
+        msg['subject'] = f'สลิปเงินเดือนของ {person["employee_name"]}'
         msg['Date'] = formatdate(localtime=True)
         
         body = f"""
-                เรียนคุณ {person['name']} 
-        นี่คือใบเเจ้งเงินเดือนประจำเดือน {person['ofmonth']} หากมีปัญหาหรือขอผิดพลาดประการใดกรุณาติดต่อผู้ดูเเล"""
+                เรียนคุณ {person['employee_name']} 
+        นี่คือใบเเจ้งเงินเดือนประจำเดือน {person['pay_period']} หากมีปัญหาหรือขอผิดพลาดประการใดกรุณาติดต่อผู้ดูเเล"""
 
         # msg.attach(MIMEText(body)) bug
         msg.attach(MIMEText('<img src="cid:image1" width="1000" height="772">', 'html'))
         
-        pdf = pdfium.PdfDocument(person['path'])
+        pdf = pdfium.PdfDocument(person['pdf_path'])
         page = pdf.get_page(0)
         pil_image = page.render(scale = 300/72).to_pil()
         pdf.close()
@@ -103,9 +103,9 @@ class send_email():
         img.add_header('Content-ID', '<image1>')
         msg.attach(img)
 
-        with open(person["path"],'rb') as f:   
+        with open(person["pdf_path"],'rb') as f:   
             attach = MIMEApplication(f.read(),_subtype="pdf")
-        attach.add_header('Content-Disposition','attachment',filename=f"เงินเดือนของ {person['name']} ประจำเดือน {month[person['ofmonth']]} {datetime.strptime(person['createat'],'%d%m%y%H%M%S').year+543}.pdf")
+        attach.add_header('Content-Disposition','attachment',filename=f"เงินเดือนของ {person['employee_name']} ประจำเดือน {person['pay_period']}.pdf")
         msg.attach(attach)
         return msg
 
@@ -122,28 +122,29 @@ class send_email():
                 while not success and attemp < EMAIL_ATTEMP:
                     attemp += 1
                     try:
-                        smtp.sendmail(SENDER,person['email'],msg.as_string())
+                        # smtp.sendmail(SENDER,person['email'],msg.as_string())
                         success = True
                     except Exception as e:
                         print(f"Fail to send mail to {person['name']} | {person['email']} trying {attemp}/{EMAIL_ATTEMP} due to {e}")
                         time.sleep(0.4)
 
-                self.progress(self.index,person['name'],person['branch'])
+                self.progress(self.index,person['employee_name'],person['branch'])
                 if not success:
-                    print(f"Unable to send mail to {person['name']} | {person['email']}")
+                    print(f"Unable to send mail to {person['employee_name']} | {person['email']}")
                     return
                 smtp.quit()
-                print(f'Mail has send to {person["name"]} | {person["email"]} {self.index}/{length}')
+                print(f'Mail has send to {person["employee_name"]} | {person["email"]} {self.index}/{length}')
 
-                path_name:str = os.path.split(person["path"])
+                path_name:str = os.path.split(person["pdf_path"])
                 checker = '1'
-                new_name = ','.join([person['name'],person["email"],checker,person["ofmonth"],person["createat"]])+'.pdf'
+                new_name = ','.join([person['employee_name'],person["email"],checker,person["pay_period"],person["created_at"]])+'.pdf'
                 new_path = os.path.join(path_name[0],new_name)
                 try:
-                    os.rename(person["path"],new_path)
+                    os.rename(person["pdf_path"],new_path)
                 except:pass
 
     def send(self,people):
+
         self.people = people
 
         # text = """

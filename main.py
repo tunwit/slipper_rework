@@ -204,7 +204,7 @@ class SlipMaker(MDScreen):
                         on_release=self.select_date
                     )
         self.confirm_makeslip_dialog = MDDialog(
-            title=f'[size=28][font=sarabunBold]Are you sure to start making slip for {len(self.going_to_make_slip)} people?[/font][/size]',
+            title=f'[size=28][font=sarabunBold]Are you sure to start making slip for {self.ids['number'].text } people?[/font][/size]',
             text='[size=20][font=sarabun]This process can not be canceled make sure you are ready[/font][/size]',
             type="simple",
             radius=[20, 7, 20, 7],
@@ -422,6 +422,10 @@ class CustomOneLineAvatarIconListItem(OneLineAvatarIconListItem):
         self.file_name = file_name
 
 class GmailSender(MDScreen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.updating_checkboxes = False
+
     going_to_send = []
     recent_employee = 0
     total_individual_checkbox = 0
@@ -536,44 +540,53 @@ class GmailSender(MDScreen):
                 self.ids.sendemail_button.text = f' 0       Send email               '
             self.recent_employee = len(f)
 
-    def individual_selected(self,button:MDCheckbox,pos):
-        data = button.parent.parent.parent
-        name,email,checker,ofmonth,createat = data.file_name[:-4].split(',')
-        payload={
-            'path':data.path,
-            'name':data.name,
-            'email':data.email,
-            'branch':data.branch,
-            'file_name':data.file_name,
-            'ofmonth':ofmonth,
-            'createat':createat
-        }
-        if button.active:
-            self.going_to_send.append(payload)
+    def individual_selected(self,button:MDCheckbox,val):
+        if self.updating_checkboxes:
+            return
+        
+        data = getattr(button, 'data', None)
+        if not data:
+            return
+        
+        if val:
+            self.going_to_send.append(data)
         else:
             try:
-                self.going_to_send.remove(payload)
+                self.going_to_send.remove(data)
             except:pass
 
-        true_state = len(self.going_to_send)
-        self.ids.sendemail_button.text = f' {true_state}       Send email               '
+        self.update_selected_stat()
 
-        if true_state > 0:
-            self.ids.sendemail_button.disabled=False
-        else:
-            self.ids.sendemail_button.disabled=True
-
-        if true_state == self.total_individual_checkbox:
-            self.ids.all_select_email.active = True
-        else:
-            self.ids.all_select_email.active = False
-
+    def update_selected_stat(self):
+        total_selected = len(self.going_to_send)
+        self.ids.sendemail_button.text = f' {total_selected}       Send email               '
+        self.ids.sendemail_button.disabled = total_selected <= 0
+        self.ids.all_select_email.active = total_selected == self.total_individual_checkbox
 
     def all_selected(self,button:MDRaisedButton):
+        self.updating_checkboxes = True
         state = button.active
-        for ids in self.ids: 
-            if 'checkbox_email_' in ids:
-                self.ids[ids].active = state
+        self.going_to_send.clear()
+        for id_key, widget in self.ids.items(): 
+            if 'checkbox_email_' in id_key and hasattr(widget, 'active'):
+                widget.active = state
+                data = getattr(widget, 'data', None)
+                if state:
+                    self.going_to_send.append(data)
+
+        self.update_selected_stat()
+        self.updating_checkboxes = False
+
+    def get_storage_dir(self):
+        output = Path.cwd() / "storage" / SHOP_NAME
+        return output
+    
+    def getMetaData(self,branch,dirName):
+        metaPath = self.get_storage_dir() / branch / dirName / "metadata.json"
+        with open(metaPath,'r',encoding='utf-8') as f:
+            data = json.load(f)
+
+        return data
 
     def add_lst(self):
         self.going_to_send=[]
@@ -607,7 +620,7 @@ class GmailSender(MDScreen):
         mdlst_employee = MDList()
         scroll.add_widget(mdlst_employee)
 
-        for branch in os.listdir(f'slip/{SHOP_NAME}'):
+        for branch in os.listdir(self.get_storage_dir()):
             content = MDBoxLayout()
             content.adaptive_height = True
             content.orientation = 'vertical'
@@ -618,29 +631,36 @@ class GmailSender(MDScreen):
                 pos_hint={'center_y':1},
                 panel_cls=MDExpansionPanelTwoLine(
                     text=f"[size=25]{branch}[/size]",
-                    secondary_text=f"{len(os.listdir(f'slip/{SHOP_NAME}/'+branch))}คน",
+                    secondary_text=f"{len(os.listdir(self.get_storage_dir() / branch))}คน",
                     font_style= "sarabunBold",
                     secondary_font_style= "sarabunBold"
                 )
             )
             #39
-            for num,filename in enumerate(os.listdir(f'slip/{SHOP_NAME}/'+branch),1):
+            for num,filename in enumerate(os.listdir(self.get_storage_dir() / branch),1):
                 # cleaned_string = regex.sub('\p{M}', '',f"{num}.{filename.split(',')[0]}")
                 # name_lenght = len(cleaned_string)
                 # less = 39 - name_lenght
                 # space = ' '*less)
                 try:
-                    name,email,checker,ofmonth,createat = filename[:-4].split(',')
+                    data = self.getMetaData(branch,filename)
+                    name = data.get('employee_name')
+                    email = data.get('email')
+                    payPeriod = data.get('pay_period')
+                    create = data.get('created_at')
+                    createdAt = datetime.strptime(create,'%d %B %Y %H:%M:%S')
+                    mailSent = data.get('mail_sent')
+
                     item = CustomOneLineAvatarIconListItem(
-                        text=f"[size=20]{num}.{name}   |   {email}   |   Salary of [b]{ofmonth}[/b]   [color=9C9B9B]Create at {datetime.strptime(createat,'%d%m%y%H%M%S').strftime('%d/%m/%y %H:%M')}[/color][/size]",
+                        text=f"[size=20]{num}.{name}   |   {email}   |   Salary of [b]{payPeriod}[/b]   [color=9C9B9B]Create at {createdAt.strftime('%d/%m/%y %H:%M')}[/color][/size]",
                         font_style = "sarabun",
                         path= os.path.join('slip',SHOP_NAME,branch,filename),
-                        email=filename.split(',')[1],
-                        name=filename.split(',')[0],
+                        email=email,
+                        name=name,
                         branch=branch,
                         file_name=filename
                     )
-                    if checker == '0':
+                    if not mailSent:
                         icon = 'account-alert'
                     else:
                         icon = 'account-check'
@@ -650,6 +670,7 @@ class GmailSender(MDScreen):
                     check = list_container()
                     checkbox = MDCheckbox()
                     checkbox.bind(active=self.individual_selected)
+                    checkbox.data = data
                     self.total_individual_checkbox += 1
                     self.ids[f"checkbox_email_{datetime.now().strftime('%f')}"] = checkbox
                     checkbox.color_active = self.theme_cls.accent_light
@@ -658,7 +679,7 @@ class GmailSender(MDScreen):
                     item.add_widget(check)
                     b = str(branch.title)+'email'
                     self.ids[b].add_widget(item)
-                except:pass
+                except Exception as e:print(e)
 
             mdlst_employee.add_widget(panel)
         self.ids['box_email'].add_widget(scroll)
