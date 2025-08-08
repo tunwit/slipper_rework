@@ -6,3 +6,4 @@ pandas
 dotenv
 jinja2
 pyppeteer
+premailer

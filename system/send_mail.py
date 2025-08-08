@@ -13,6 +13,8 @@ import time
 import threading
 from datetime import datetime
 from setup_config import EMAIL_ATTEMP ,SENDER ,PASSWORD, FROM_EMAIL
+from premailer import transform
+
 
 month = {
         "January":"มกราคม", 
@@ -87,21 +89,13 @@ class send_email():
         นี่คือใบเเจ้งเงินเดือนประจำเดือน {person['pay_period']} หากมีปัญหาหรือขอผิดพลาดประการใดกรุณาติดต่อผู้ดูเเล"""
 
         # msg.attach(MIMEText(body)) bug
-        msg.attach(MIMEText('<img src="cid:image1" width="1000" height="772">', 'html'))
+        # msg.attach(MIMEText('<img src="cid:image1" width="1000" height="772">', 'html'))
         
-        pdf = pdfium.PdfDocument(person['pdf_path'])
-        page = pdf.get_page(0)
-        pil_image = page.render(scale = 300/72).to_pil()
-        pdf.close()
+        with open(person['html_path'], "r", encoding="utf-8") as f:
+            html_content = f.read()
 
-        temp_file = tempfile.NamedTemporaryFile(delete=False,suffix='.png')
-        pil_image.save(temp_file.name)
-        image_data = temp_file.read()
-        temp_file.close()
-
-        img = MIMEImage(image_data,_subtype="png")
-        img.add_header('Content-ID', '<image1>')
-        msg.attach(img)
+        
+        msg.attach(MIMEText(transform(html_content),'html'))
 
         with open(person["pdf_path"],'rb') as f:   
             attach = MIMEApplication(f.read(),_subtype="pdf")
@@ -122,7 +116,7 @@ class send_email():
                 while not success and attemp < EMAIL_ATTEMP:
                     attemp += 1
                     try:
-                        # smtp.sendmail(SENDER,person['email'],msg.as_string())
+                        smtp.sendmail(SENDER,person['email'],msg.as_string())
                         success = True
                     except Exception as e:
                         print(f"Fail to send mail to {person['name']} | {person['email']} trying {attemp}/{EMAIL_ATTEMP} due to {e}")

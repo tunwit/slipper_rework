@@ -143,7 +143,7 @@ class excel():
             await page.pdf({
                 'path': pdf_path,
                 'format': 'A4',
-                'landscape': True,
+                'landscape': False,
                 'printBackground': True,
                 'preferCSSPageSize': True,
                 'margin': {'top': '10mm', 'bottom': '10mm', 'left': '10mm', 'right': '10mm'},
@@ -181,6 +181,7 @@ class excel():
             "employee_id": context['employee']['id'],
             "employee_name": context['employee']['name'],
             "email": context['employee']['email'],
+            "branch":context['employee']['branch'],
             "pay_period": context['payPeriod'],
             "pdf_path": str(file_name.with_suffix(".pdf")),
             "html_path": str(file_name.with_suffix(".html")),
