@@ -43,7 +43,7 @@ class excel():
         self.pages = []
         self.concurrent_count = 5
         self.semaphore = asyncio.Semaphore(self.concurrent_count)
-
+    
     def ex_to_df(self):
         dfs = pd.read_excel(self.path,header=1,sheet_name=None)
         return self.clean_sheet(dfs)
@@ -52,18 +52,18 @@ class excel():
         to_pop = [df for df in dfs if not df.startswith("D")]
         for b in to_pop:
             dfs.pop(b)
+        
 
         cleaned_dfs = {}
         for sheet_name, df in dfs.items():
             df.columns.values[0] = "รหัสพนักงาน"
-    
             if "รหัสพนักงาน" in df.columns and "ชื่อ-นามสกุล" in df.columns:
                 new_name = sheet_name.replace("D", "", 1)  # remove only the first "D"
                 cleaned_dfs[new_name] = df.dropna(subset=["รหัสพนักงาน", "ชื่อ-นามสกุล"])
                 first_col = cleaned_dfs[new_name].columns[0]
                 cleaned_dfs[new_name][first_col] = cleaned_dfs[new_name][first_col].astype(pd.Int64Dtype()).astype(str)
                 cleaned_dfs[new_name].fillna(0, inplace=True)
-
+        
         return cleaned_dfs
     
     def get_storage_dir(self):
@@ -251,8 +251,12 @@ class excel():
             "formatted": self.format_value(sum(item["value"] for item in deduction),"float")
         }
 
+        print(SLIP_DETAIL['company']['branch'])
         context = {
-        "company":SLIP_DETAIL['company'],
+        "company":{
+            "name":SLIP_DETAIL['company']['name'],
+            "branch":SLIP_DETAIL['company']['branch'][employee['branch']]
+        },
         "employee": employee,
         "sections": {
             "earnings": earnings,

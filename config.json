@@ -1,13 +1,33 @@
 {
-  "shop_key": "HARIS",
+  "shop_key": "TUKKAE",
   "email_attemps": 5,
   "haris_slip_details": {
     "template_pdf": "slip_portrait_pdf.html",
     "template_email": "slip_portrait_email.html",
     "company": {
       "name": "Haris premium buffet",
-      "address": "บริษัท ไอแอมฟู้ด จำกัด\n63/34 ถนนเลี่ยงเมืองปากเกร็ด ตำบลบางตลาด อ.ปากเกร็ด เทศบาลนครนนทบุรี จ.นนทบุรี 11120",
-      "ID": "0125562015764"
+      "branch": {
+        "ครัวกลาง": {
+          "address": "บริษัท ไอ แอม ฟู้ด จำกัด สำนักงานใหญ่ 63/34 ถนนเลี่ยงเมืองปากเกร็ด ตำบลบางตลาด อ.ปากเกร็ด เทศบาลนครนนทบุรี  จ.นนทบุรี 11120 ",
+          "tax_id": "0125562015764"
+        },
+        "นนทบุรี": {
+          "address": "บริษัท ไอ แอม ฟู้ด จำกัด สำนักงานใหญ่ 63/34 ถนนเลี่ยงเมืองปากเกร็ด ตำบลบางตลาด อ.ปากเกร็ด เทศบาลนครนนทบุรี  จ.นนทบุรี 11120 ",
+          "tax_id": "0125562015764"
+        },
+        "รามอินทรา": {
+          "address": "บริษัท ไอ แอม ฟู้ด จำกัด สาขา 00001 739/1 ห้องเลขที่ 101-102 ถนนรามอินทรา แขวงคันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
+          "tax_id": "0125562015764"
+        },
+        "กัลปพฤกษ์": {
+          "address": "บริษัท ไอแอมฟู้ด จำกัด 63/34 ซอย1 แขวง คันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
+          "tax_id": "0125562015764"
+        },
+        "ขับรถ": {
+          "address": "บริษัท ไอ แอม ฟู้ด จำกัด สำนักงานใหญ่ 63/34 ถนนเลี่ยงเมืองปากเกร็ด ตำบลบางตลาด อ.ปากเกร็ด เทศบาลนครนนทบุรี  จ.นนทบุรี 11120 ",
+          "tax_id": "0125562015764"
+        }
+      }
     },
     "earnings": {
       "label_key": "earnings",
@@ -200,38 +220,194 @@
     }
   },
   "tukkae_slip_details": {
-    "email_col": 20,
-    "branch": ["B4", 0, 0],
-    "earnings": ["B9", 0, 0],
-    "warning": ["A26", 0, 0],
-    "deduction": ["F9", 0, 0],
-    "payslip": ["J1", 0, 0],
-    "details": ["K9", 0, 0],
-    "personnelcode": ["B5", "C5", 1],
-    "name": ["B6", "C6", 2],
-    "position": ["B7", "C7", 4],
-    "salary": ["B11", "C11", 5],
-    "positionallowance": ["B12", "C12", 6],
-    "diligenceallowance": ["B13", "C13", 7],
-    "incentive": ["B14", "C14", 14],
-    "efficient": ["B15", "C15", 17],
-    "holidays": ["B16", "C16", 15],
-    "welfare": ["B17", "C17", 12],
-    "oth": ["B18", "C18", 16],
-    "bonus": ["B19", "C19", 18],
-    "totale": ["B21", "C21", "=SUM(C11:C19)"],
-    "totled": ["F21", "G21", "=SUM(G11:G14)"],
-    "net": ["B23", "C23", 19],
-    "loan": ["F15", "G15", 11],
-    "repayment": ["F14", "G14", 10],
-    "totallate": ["F13", "G13", 13],
-    "social": ["F12", "G12", 9],
-    "advance": ["F11", "G11", 8],
-    "absent": ["K11", "L11", 21],
-    "late_detail": ["K12", "L12", 22],
-    "sick": ["K13", "L13", 23],
-    "personal": ["K14", "L14", 24],
-    "vacation": ["K15", "L15", 25],
-    "oth_detail": ["K16", "L16", 26]
+    "template_pdf": "slip_portrait_pdf.html",
+    "template_email": "slip_portrait_email.html",
+    "company": {
+      "name": "ตุ๊กแกอวกาศ Steak",
+      "branch": {
+        "ครัวกลาง": {
+          "address": "บริษัท ไอแอมฟู้ด จำกัด 63/34 ซอย1 แขวง คันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
+          "tax_id": "0125562015764"
+        },
+        "ตุ๊กแกอวกาศสามัคคี": {
+          "address": "บริษัท ไอแอมฟู้ด จำกัด 63/34 ซอย1 แขวง คันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
+          "tax_id": "0125562015764"
+        },
+        "ตุ๊กแกอวกาศรามอินทรา": {
+          "address": "บริษัท ไอแอมฟู้ด จำกัด 63/34 ซอย1 แขวง คันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
+          "tax_id": "0125562015764"
+        },
+        "Butcherแจ้งวัฒนะ": {
+          "address": "บริษัท ไอแอมฟู้ด จำกัด 63/34 ซอย1 แขวง คันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
+          "tax_id": "0125562015764"
+        },
+        "Butcherราชพฤกษ์": {
+          "address": "บริษัท ไอแอมฟู้ด จำกัด 63/34 ซอย1 แขวง คันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
+          "tax_id": "0125562015764"
+        }
+      }
+    },
+    "earnings": {
+      "label_key": "earnings",
+      "fields": [
+        {
+          "key": "อัตราเงินเดือน",
+          "label_key": "salary",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "ค่าตำแหน่ง",
+          "label_key": "positionallowance",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "เบี้ยขยัน",
+          "label_key": "diligenceallowance",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "Incentive",
+          "label_key": "incentive",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "ประเมิน",
+          "label_key": "efficient",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "นักขัด",
+          "label_key": "holidays",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+
+        {
+          "key": "สวัสดิการอื่นๆ",
+          "label_key": "welfare",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "โอที",
+          "label_key": "otd",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "โบนัส",
+          "label_key": "bonus",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        }
+      ]
+    },
+    "deduction": {
+      "label_key": "deduction",
+      "fields": [
+        {
+          "key": "เบิก",
+          "label_key": "advance",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "ปกส.",
+          "label_key": "social",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "ขาด/ลา/สาย",
+          "label_key": "totallate",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "ยอดจ่ายเงินกู้",
+          "label_key": "repayment",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        }
+      ]
+    },
+    "details": {
+      "label_key": "details",
+      "fields": [
+        {
+          "key": "ขาด (วัน)",
+          "label_key": "absent",
+          "display": true,
+          "format_key": "int",
+          "unit_key": "day"
+        },
+        {
+          "key": "สาย (นาที)",
+          "label_key": "สาย",
+          "display": true,
+          "format_key": "int",
+          "unit_key": "minute"
+        },
+        {
+          "key": "ลาป่วย (วัน)",
+          "label_key": "sick",
+          "display": true,
+          "format_key": "int",
+          "unit_key": "day"
+        },
+        {
+          "key": "ลากิจ (วัน)",
+          "label_key": "personal",
+          "display": true,
+          "format_key": "int",
+          "unit_key": "day"
+        },
+        {
+          "key": "ลาพักร้อน (วัน)",
+          "label_key": "vacation",
+          "display": true,
+          "format_key": "int",
+          "unit_key": "day"
+        },
+        {
+          "key": "โอที (ชั่วโมง)",
+          "label_key": "oth_detail",
+          "display": true,
+          "format_key": "int",
+          "unit_key": "day"
+        },
+        {
+          "key": "เงินกู้ค้าง",
+          "label_key": "loan",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        }
+      ]
+    },
+    "total": {
+      "key": "รายได้สุทธิ",
+      "label_key": "net",
+      "format_key": "float",
+      "unit_key": "฿"
+    }
   }
 }

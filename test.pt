@@ -1,3 +1,0 @@
-import weasyprint
-
-weasyprint.HTML(string="<h1>Test PDF on ARM</h1>").write_pdf("test.pdf")

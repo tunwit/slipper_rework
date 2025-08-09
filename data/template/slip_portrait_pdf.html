@@ -447,8 +447,8 @@
           <tr>
             <td class="company-info">
               <h1>{{ context.company.name }}</h1>
-              <p>{{ context.company.address }}</p>
-              <p><strong>{{ t('tax_id') }}</strong> {{ context.company.ID }}</p>
+              <p>{{ context.company.branch.address }}</p>
+              <p><strong>{{ t('tax_id') }}</strong> {{ context.company.branch.tax_id }}</p>
             </td>
             <td class="slip-info">
               <p class="slip-title">{{ t('payslip') }}</p>
