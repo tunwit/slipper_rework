@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Salary Slip</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Noto+Sans+Thai:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Kanit", sans-serif;
+        background: #f8fafc;
+        padding: 10px;
+        color: #1e293b;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 6px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+      }
+
+      .header {
+        background: #1e293b;
+        color: white;
+        padding: 15px 20px;
+        border-bottom: 3px solid #3b82f6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .company-info h1 {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+
+      .company-info p {
+        font-size: 12px;
+        opacity: 0.9;
+        margin-bottom: 3px;
+      }
+
+      .slip-title {
+        font-size: 20px;
+        font-weight: 600;
+        text-align: right;
+      }
+
+      .content {
+        padding: 15px 20px;
+      }
+
+      .section {
+        margin-bottom: 15px;
+        page-break-inside: avoid;
+      }
+
+      .section-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 5px;
+      }
+
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        background: #f8fafc;
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 15px;
+      }
+
+      .info-item {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .info-label {
+        font-size: 10px;
+        font-weight: 500;
+        color: #64748b;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+      }
+
+      .info-value {
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      /* Horizontal layout for tables */
+      .tables-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 15px;
+      }
+
+      .table-section {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .table-container {
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        overflow: hidden;
+        background: white;
+        flex: 1;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+        height: 100%;
+      }
+
+      th {
+        background: #64748b;
+        color: white;
+        padding: 8px 12px;
+        text-align: left;
+        font-size: 10px;
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+
+      td {
+        font-size: 12px;
+        padding: 6px 12px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f8fafc;
+      }
+
+      .totals {
+        background: #334155 !important;
+        color: white;
+        font-weight: 600;
+      }
+
+      .totals td {
+        border: none;
+        font-size: 12px;
+        padding: 10px 12px;
+      }
+
+      /* Details section spans full width */
+      .details-section {
+        grid-column: 1 / -1;
+        margin-top: 10px;
+      }
+
+      .details-table {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+
+      .details-item {
+        background: #f8fafc;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        text-align: center;
+      }
+
+      .details-item .label {
+        font-size: 12px;
+        color: #64748b;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+        font-weight: 500;
+      }
+
+      .details-item .value {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1e293b;
+      }
+
+      .net-pay {
+        background: #1e293b;
+        color: white;
+        border-radius: 6px;
+        padding: 15px;
+        text-align: center;
+        border-left: 4px solid #3b82f6;
+        margin: 15px 0;
+      }
+
+      .net-pay .label {
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+      }
+
+      .net-pay .amount {
+        font-size: 22px;
+        font-weight: 700;
+      }
+
+      .footer {
+        background: #f8fafc;
+        padding: 12px 20px;
+        text-align: center;
+        font-size: 14px;
+        color: #64748b;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      .note {
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-left: 4px solid #64748b;
+        border-radius: 6px;
+        padding: 12px;
+        margin-top: 15px;
+        font-size: 12px;
+        color: #475569;
+      }
+
+      @media print {
+        @page {
+          size: A4 portrait;
+          margin: 0.6cm;
+        }
+
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+
+        html,
+        body {
+          width: 210mm;
+          height: 297mm;
+        }
+
+        body {
+          background: white;
+          padding: 0;
+          margin: 0;
+          font-size: 12px;
+        }
+
+        .container {
+          box-shadow: none;
+          max-width: 100%;
+          border: none;
+          margin: 0;
+        }
+
+        .header {
+          background: #1e293b !important;
+          -webkit-print-color-adjust: exact;
+          color: white !important;
+          padding: 10px 15px;
+        }
+
+        .content {
+          padding: 10px 15px;
+        }
+
+        .tables-container {
+          gap: 15px;
+        }
+
+        .totals {
+          background: #334155 !important;
+          color: white !important;
+          -webkit-print-color-adjust: exact;
+        }
+
+        .net-pay {
+          background: #1e293b !important;
+          color: white !important;
+          -webkit-print-color-adjust: exact;
+        }
+
+        .footer {
+          font-size: 14px;
+          padding: 8px 15px;
+        }
+
+        .company-info p {
+          max-width: 300px;
+        }
+
+        .section,
+        .table-container,
+        .net-pay {
+          page-break-inside: avoid;
+        }
+
+        /* Ensure tables maintain equal height in print */
+        .table-container {
+          height: auto;
+          min-height: 200px;
+        }
+      }
+
+      @media screen and (max-width: 768px) {
+        .tables-container {
+          grid-template-columns: 1fr;
+          gap: 15px;
+        }
+
+        .info-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .details-table {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="company-info">
+          <h1>Haris premium buffet</h1>
+          <p>บริษัท ไอแอมฟู้ด จำกัด
+63/34 ถนนเลี่ยงเมืองปากเกร็ด ตำบลบางตลาด อ.ปากเกร็ด เทศบาลนครนนทบุรี จ.นนทบุรี 11120</p>
+          <p><strong>เลขประจำตัวผู้เสียภาษี</strong> 0125562015764</p>
+        </div>
+
+        <div>
+          <p class="slip-title">เอกสารเเจ้งเงินเดือน</p>
+          <div>August 2568</div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="section">
+          <div class="section-title">ข้อมูลพนักงาน</div>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">รหัสพนังงาน</div>
+              <div class="info-value">1</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">ชื่อ</div>
+              <div class="info-value"> Reaksmey Bunthoeurn</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">ตำแหน่ง</div>
+              <div class="info-value">ครัวร้อน</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">สาขา</div>
+              <div class="info-value">นนทบุรี</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Horizontal Tables Layout -->
+        <div class="tables-container">
+          <!-- Earnings Table -->
+            
+          <div class="table-section">
+            <div class="section-title">รายได้</div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>รายการ</th>
+                    <th style="text-align: right">จำนวน (฿)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                  <tr>
+                    <td>อัตราเงินเดือน</td>
+                    <td style="text-align: right">
+                      14,412.00 ฿
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td>ค่าตำแหน่ง</td>
+                    <td style="text-align: right">
+                      0.00 ฿
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td>OT (วัน)</td>
+                    <td style="text-align: right">
+                      960.80 ฿
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td>OT (ชั่วโมง)</td>
+                    <td style="text-align: right">
+                      360.30 ฿
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td>OT (ชั่วโมงวันขัตฤกษ์)</td>
+                    <td style="text-align: right">
+                      180.15 ฿
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td>เบี้ยขยัน</td>
+                    <td style="text-align: right">
+                      1,000.00 ฿
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td>สวัสดิการอื่นๆ</td>
+                    <td style="text-align: right">
+                      0.00 ฿
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td>ยอดเป้า</td>
+                    <td style="text-align: right">
+                      0.00 ฿
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td>โบนัส</td>
+                    <td style="text-align: right">
+                      0.00 ฿
+                    </td>
+                  </tr>
+                   
+
+                  <tr class="totals">
+                    <td>รวมเงินได้</td>
+                    <td style="text-align: right">
+                      16,913.25 ฿
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Deductions Table -->
+          
+          <div class="table-section">
+            <div class="section-title">รายการหัก</div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>รายการ</th>
+                    <th style="text-align: right">จำนวน (฿)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                  <tr>
+                    <td>เบิก</td>
+                    <td style="text-align: right">
+                      0.00 ฿
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td>ประกันสังคม</td>
+                    <td style="text-align: right">
+                      720.00 ฿
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td>จ่ายเงินกู้</td>
+                    <td style="text-align: right">
+                      2,750.00 ฿
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td>สาย</td>
+                    <td style="text-align: right">
+                      0.00 ฿
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td>ลา</td>
+                    <td style="text-align: right">
+                      0.00 ฿
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td>หนี้</td>
+                    <td style="text-align: right">
+                      0.00 ฿
+                    </td>
+                  </tr>
+                    
+                  <tr>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                  </tr>
+                  
+                  <tr>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                  </tr>
+                  
+                  <tr>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                  </tr>
+                   
+                  <tr class="totals">
+                    <td>รวมรายการหัก</td>
+                    <td style="text-align: right">
+                      3,470.00 ฿
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Details Section -->
+        <div class="section details-section">
+          <div class="section-title">รายละเอียดเพิ่มเติม</div>
+          <div class="details-table">
+            
+            <div class="details-item">
+              <div class="label">ขาด</div>
+              <div class="value">0 วัน</div>
+            </div>
+            
+            <div class="details-item">
+              <div class="label">สาย</div>
+              <div class="value">0 นาที</div>
+            </div>
+            
+            <div class="details-item">
+              <div class="label">ลาป่วย</div>
+              <div class="value">0 วัน</div>
+            </div>
+            
+            <div class="details-item">
+              <div class="label">ลากิจ</div>
+              <div class="value">0 วัน</div>
+            </div>
+            
+            <div class="details-item">
+              <div class="label">ลาพักร้อน</div>
+              <div class="value">0 วัน</div>
+            </div>
+            
+            <div class="details-item">
+              <div class="label">OT (วัน)</div>
+              <div class="value">2 วัน</div>
+            </div>
+            
+            <div class="details-item">
+              <div class="label">OT (ชั่วโมง)</div>
+              <div class="value">4 ชั่วโมง</div>
+            </div>
+            
+            <div class="details-item">
+              <div class="label">OT (ชั่วโมงวันขัตฤกษ์)</div>
+              <div class="value">1 ชั่วโมง</div>
+            </div>
+            
+            <div class="details-item">
+              <div class="label">เงินกู้ค้างชำระ</div>
+              <div class="value">2,750.00 ฿</div>
+            </div>
+            
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="net-pay">
+            <div class="label">รายได้สุทธิ</div>
+            <div class="amount">
+              13,443.00 ฿
+            </div>
+          </div>
+        </div>
+
+        <div class="note">
+          <strong>Note:</strong> This is a system-generated document. No
+          signature is required.
+        </div>
+      </div>
+
+      <div class="footer">
+        <p><strong>สร้าง ณ วันที่ 05 August 2025 16:59:44</strong></p>
+        <p>หากต้องการสอบถาม กรุณาติดต่อเจ้าหน้าที่</p>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mobile Payslip</title>
+    <style>
+      /* Reset and base styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        background-color: #f7fafc;
+        color: #1a202c;
+        font-size: 14px;
+        line-height: 1.3;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+      }
+
+      /* Main container table */
+      .email-container {
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+        background-color: #f7fafc;
+        border-collapse: collapse;
+      }
+
+      /* Header styles */
+      .header-table {
+        width: 100%;
+        background-color: #4c51bf;
+        background-image: linear-gradient(135deg, #4c51bf 0%, #667eea 100%);
+        border-collapse: collapse;
+      }
+
+      .header-cell {
+        padding: 15px 12px 20px;
+        text-align: center;
+        color: white;
+        position: relative;
+      }
+
+      .company-name {
+        font-size: 18px;
+        font-weight: bold;
+        margin: 0 0 6px 0;
+        color: white;
+      }
+
+      .payslip-title {
+        font-size: 15px;
+        font-weight: normal;
+        margin: 0 0 3px 0;
+        color: white;
+        opacity: 0.95;
+      }
+
+      .pay-period {
+        font-size: 12px;
+        color: white;
+        opacity: 0.9;
+        background-color: rgba(255,255,255,0.15);
+        padding: 4px 10px;
+        border-radius: 15px;
+        display: inline-block;
+        margin-top: 6px;
+      }
+
+      .status-badge {
+        position: absolute;
+        top: 15px;
+        right: 12px;
+        background-color: rgba(72, 187, 120, 0.2);
+        color: #38a169;
+        padding: 3px 8px;
+        border-radius: 15px;
+        font-size: 10px;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+
+      /* Card styles using tables */
+      .card-table {
+        width: 100%;
+        background-color: white;
+        border-collapse: collapse;
+        margin: 10px 0;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+
+      .card-header {
+        width: 100%;
+        background-color: #f7fafc;
+        border-collapse: collapse;
+      }
+
+      .card-header-cell {
+        padding: 12px 15px;
+        border-bottom: 1px solid #e2e8f0;
+        background-color: #f7fafc;
+      }
+
+      .card-title {
+        font-size: 15px;
+        font-weight: bold;
+        color: #2d3748;
+        margin: 0;
+        border-left: 3px solid #4c51bf;
+        padding-left: 8px;
+      }
+
+      .card-content {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .card-content-cell {
+        padding: 15px;
+        vertical-align: top;
+      }
+
+      /* Info row styles */
+      .info-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .info-row {
+        border-bottom: 1px solid #f1f5f9;
+      }
+
+      .info-row:last-child {
+        border-bottom: none;
+      }
+
+      .info-label-cell {
+        padding: 8px 0;
+        width: 40%;
+        vertical-align: middle;
+      }
+
+      .info-value-cell {
+        padding: 8px 0;
+        width: 60%;
+        text-align: right;
+        vertical-align: middle;
+      }
+
+      .info-label {
+        font-size: 11px;
+        color: #718096;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+
+      .info-value {
+        font-size: 13px;
+        font-weight: bold;
+        color: #2d3748;
+        word-break: break-word;
+      }
+
+      /* Financial item styles */
+      .financial-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .financial-row {
+        border-bottom: 1px solid #f1f5f9;
+      }
+
+      .financial-row:last-child {
+        border-bottom: none;
+      }
+
+      .financial-label-cell {
+        padding: 10px 0;
+        width: 60%;
+        vertical-align: middle;
+      }
+
+      .financial-amount-cell {
+        padding: 10px 0;
+        width: 40%;
+        text-align: right;
+        vertical-align: middle;
+      }
+
+      .item-label {
+        font-size: 13px;
+        color: #4a5568;
+        font-weight: normal;
+      }
+
+      .item-amount {
+        font-size: 14px;
+        font-weight: bold;
+        color: #2d3748;
+      }
+
+      /* Total row styles */
+      .total-table {
+        width: 100%;
+        background-color: #4c51bf;
+        border-collapse: collapse;
+        margin: 0;
+      }
+
+      .total-cell {
+        padding: 12px 15px;
+        color: white;
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      .total-label {
+        width: 60%;
+        text-align: left;
+      }
+
+      .total-amount {
+        width: 40%;
+        text-align: right;
+      }
+
+      /* Net pay highlight */
+      .net-pay-table {
+        width: 100%;
+        background-color: #48bb78;
+        border-collapse: collapse;
+        margin: 15px 0;
+        border-radius: 15px;
+        overflow: hidden;
+      }
+
+      .net-pay-cell {
+        padding: 18px 15px;
+        text-align: center;
+        color: white;
+      }
+
+      .net-pay-label {
+        font-size: 13px;
+        font-weight: normal;
+        margin: 0 0 6px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        opacity: 0.95;
+      }
+
+      .net-pay-amount {
+        font-size: 26px;
+        font-weight: bold;
+        margin: 0;
+        color: white;
+      }
+
+      /* Details styles */
+      .details-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .detail-row {
+        margin-bottom: 8px;
+      }
+
+      .detail-cell {
+        padding: 12px;
+        background-color: #f7fafc;
+        border-left: 3px solid #4c51bf;
+        border-radius: 8px;
+        margin-bottom: 8px;
+      }
+
+      .detail-inner-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .detail-label-cell {
+        width: 50%;
+        vertical-align: middle;
+      }
+
+      .detail-value-cell {
+        width: 50%;
+        text-align: right;
+        vertical-align: middle;
+      }
+
+      .detail-label {
+        font-size: 11px;
+        color: #718096;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+
+      .detail-value {
+        font-size: 13px;
+        font-weight: bold;
+        color: #2d3748;
+      }
+
+      /* Action buttons */
+      .action-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+
+      .action-row {
+        width: 100%;
+      }
+
+      .action-cell {
+        width: 50%;
+        padding: 6px;
+        vertical-align: top;
+      }
+
+      .action-btn-table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .action-btn-cell {
+        padding: 14px 20px;
+        text-align: center;
+        color: #4a5568;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .action-btn-table.primary {
+        background-color: #4c51bf;
+        border-color: #4c51bf;
+      }
+
+      .action-btn-table.primary .action-btn-cell {
+        color: white;
+      }
+
+      /* Footer */
+      .footer-table {
+        width: 100%;
+        background-color: #2d3748;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      .footer-cell {
+        padding: 24px 16px;
+        text-align: center;
+        color: white;
+      }
+
+      .footer-text {
+        font-size: 14px;
+        margin: 0 0 8px 0;
+        opacity: 0.9;
+      }
+
+      .footer-timestamp {
+        font-size: 12px;
+        margin: 0;
+        opacity: 0.7;
+        font-weight: normal;
+      }
+
+      /* Spacer */
+      .spacer {
+        height: 16px;
+        background-color: #f7fafc;
+      }
+
+      /* Mobile responsive */
+      @media only screen and (max-width: 480px) {
+        .email-container {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+
+        .header-cell {
+          padding: 16px 12px 24px !important;
+        }
+
+        .company-name {
+          font-size: 20px !important;
+        }
+
+        .card-content-cell {
+          padding: 16px !important;
+        }
+
+        .net-pay-amount {
+          font-size: 28px !important;
+        }
+
+        .action-cell {
+          width: 100% !important;
+          display: block !important;
+        }
+
+        .status-badge {
+          position: static !important;
+          display: block !important;
+          margin-bottom: 10px !important;
+        }
+      }
+
+      /* Email client specific fixes */
+      .outlook-spacer {
+        mso-line-height-rule: exactly;
+        line-height: 16px;
+        font-size: 16px;
+      }
+
+      /* Remove blue links in some clients */
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Main container -->
+    <table class="email-container" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        <td>
+          <!-- Header -->
+          <table class="header-table" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td class="header-cell">
+                <h1 class="company-name">{{ context.company.name }}</h1>
+                <p class="payslip-title">{{ t('payslip') }}</p>
+                <span class="pay-period">{{ context.payPeriod }}</span>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Spacer -->
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr><td class="spacer">&nbsp;</td></tr>
+          </table>
+
+          <!-- Employee Information Card -->
+          <table class="card-table" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td>
+                <table class="card-header" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td class="card-header-cell">
+                      <h2 class="card-title">{{ t('employee_infomation') }}</h2>
+                    </td>
+                  </tr>
+                </table>
+                <table class="card-content" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td class="card-content-cell">
+                      <table class="info-table" cellpadding="0" cellspacing="0" border="0">
+                        <tr class="info-row">
+                          <td class="info-label-cell">
+                            <span class="info-label">{{ t('employee_id') }}</span>
+                          </td>
+                          <td class="info-value-cell">
+                            <span class="info-value">{{ context.employee.id }}</span>
+                          </td>
+                        </tr>
+                        <tr class="info-row">
+                          <td class="info-label-cell">
+                            <span class="info-label">{{ t('employee_name') }}</span>
+                          </td>
+                          <td class="info-value-cell">
+                            <span class="info-value">{{ context.employee.name }}</span>
+                          </td>
+                        </tr>
+                        <tr class="info-row">
+                          <td class="info-label-cell">
+                            <span class="info-label">{{ t('employee_position') }}</span>
+                          </td>
+                          <td class="info-value-cell">
+                            <span class="info-value">{{ context.employee.position }}</span>
+                          </td>
+                        </tr>
+                        <tr class="info-row">
+                          <td class="info-label-cell">
+                            <span class="info-label">{{ t('employee_branch') }}</span>
+                          </td>
+                          <td class="info-value-cell">
+                            <span class="info-value">{{ context.employee.branch }}</span>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Net Pay Highlight -->
+          <table class="net-pay-table" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td class="net-pay-cell">
+                <p class="net-pay-label">{{ context.sections.net.label }}</p>
+                <h2 class="net-pay-amount">{{ context.sections.net.formatted }} {{ context.sections.net.unit }}</h2>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Earnings Card -->
+          <table class="card-table" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td>
+                <table class="card-header" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td class="card-header-cell">
+                      <h2 class="card-title">{{ t('earnings') }}</h2>
+                    </td>
+                  </tr>
+                </table>
+                <table class="card-content" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td class="card-content-cell">
+                      <table class="financial-table" cellpadding="0" cellspacing="0" border="0">
+                        {% for item in context.sections.earnings %}
+                        <tr class="financial-row">
+                          <td class="financial-label-cell">
+                            <span class="item-label">{{ item.label }}</span>
+                          </td>
+                          <td class="financial-amount-cell">
+                            <span class="item-amount">{{ item.formatted }} {{ item.unit }}</span>
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </table>
+                      <table class="total-table" cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                          <td class="total-cell total-label">{{ context.totals.earnings.label }}</td>
+                          <td class="total-cell total-amount">{{ context.totals.earnings.formatted }} {{ context.totals.earnings.unit }}</td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Deductions Card -->
+          <table class="card-table" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td>
+                <table class="card-header" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td class="card-header-cell">
+                      <h2 class="card-title">{{ t('deduction') }}</h2>
+                    </td>
+                  </tr>
+                </table>
+                <table class="card-content" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td class="card-content-cell">
+                      <table class="financial-table" cellpadding="0" cellspacing="0" border="0">
+                        {% for item in context.sections.deduction %}
+                        <tr class="financial-row">
+                          <td class="financial-label-cell">
+                            <span class="item-label">{{ item.label }}</span>
+                          </td>
+                          <td class="financial-amount-cell">
+                            <span class="item-amount">{{ item.formatted }} {{ item.unit }}</span>
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </table>
+                      <table class="total-table" cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                          <td class="total-cell total-label">{{ context.totals.deduction.label }}</td>
+                          <td class="total-cell total-amount">{{ context.totals.deduction.formatted }} {{ context.totals.deduction.unit }}</td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Details Card -->
+          <table class="card-table" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td>
+                <table class="card-header" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td class="card-header-cell">
+                      <h2 class="card-title">{{ t('details') }}</h2>
+                    </td>
+                  </tr>
+                </table>
+                <table class="card-content" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td class="card-content-cell">
+                      {% for item in context.sections.details %}
+                      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 12px;">
+                        <tr>
+                          <td class="detail-cell">
+                            <table class="detail-inner-table" cellpadding="0" cellspacing="0" border="0">
+                              <tr>
+                                <td class="detail-label-cell">
+                                  <span class="detail-label">{{ item.label }}</span>
+                                </td>
+                                <td class="detail-value-cell">
+                                  <span class="detail-value">{{ item.formatted }} {{ item.unit }}</span>
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                      {% endfor %}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Company Info Card -->
+          <table class="card-table" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td>
+                <table class="card-content" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td class="card-content-cell">
+                      <table class="info-table" cellpadding="0" cellspacing="0" border="0">
+                        <tr class="info-row">
+                          <td class="info-label-cell">
+                            <span class="info-label">{{ t('company_address') }}</span>
+                          </td>
+                          <td class="info-value-cell">
+                            <span class="info-value">{{ context.company.address }}</span>
+                          </td>
+                        </tr>
+                        <tr class="info-row">
+                          <td class="info-label-cell">
+                            <span class="info-label">{{ t('tax_id') }}</span>
+                          </td>
+                          <td class="info-value-cell">
+                            <span class="info-value">{{ context.company.ID }}</span>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+                    <!-- Action Buttons -->
+          <table class="action-table" cellpadding="0" cellspacing="0" border="0">
+            <tr class="action-row">
+              <td class="action-cell">
+                <table class="action-btn-table" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td class="action-btn-cell">
+                      ⬇️ {{ t('download_below') }}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Footer -->
+          <table class="footer-table" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td class="footer-cell">
+                <p class="footer-text">{{ t('contactHR') }}</p>
+                <p class="footer-timestamp">{{ t('generatedon') }} {{ context.timeStamp }}</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

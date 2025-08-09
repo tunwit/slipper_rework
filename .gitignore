@@ -2,9 +2,11 @@
 *.env.haris
 *.env.tukkae
 slip/
+storage/
 todo.txt
 **/__pycache__/
 __pycache__
 __pycache__/
 *test
 test.py
+.venv/

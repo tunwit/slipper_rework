@@ -2,3 +2,9 @@ Kivy
 kivymd
 openpyxl
 pypdfium2
+pandas
+dotenv
+jinja2
+pyppeteer
+premailer
+weasyprint

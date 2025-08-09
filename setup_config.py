@@ -5,9 +5,9 @@ import os
 
 load_dotenv('.env.local')
 with open("config.json","r",encoding="utf8") as config:
-            config = json.load(config)
+    config = json.load(config)
 
-if config['shop_id'] == "1":
+if config['shop_key'] == "HARIS":
     SENDER = os.getenv('sender_email_haris')
     PASSWORD = os.getenv('email_password_haris')
     SHOP_NAME = 'haris'
@@ -15,7 +15,7 @@ if config['shop_id'] == "1":
     TITLE = "Haris Slipper"
     LOGO_PATH = "data\image\Harislogo.jpg"
     
-elif config['shop_id'] == "2":
+elif config['shop_key'] == "TUKKAE":
     SENDER = os.getenv('sender_email_tukkae')
     PASSWORD = os.getenv('email_password_tukkae')
     SHOP_NAME = 'tukkae'
@@ -27,6 +27,6 @@ else:
     print('Invalid shop Id')
     sys.exit()
 
-SHOP_ID = config['shop_id']
+SHOP_KEY = config['shop_key']
 EMAIL_ATTEMP = config['email_attemps']
 SLIP_DETAIL = config[f'{SHOP_NAME}_slip_details']

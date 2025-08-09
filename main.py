@@ -24,31 +24,34 @@ from kivymd.uix.textfield import MDTextField
 from kivymd.uix.pickers import MDDatePicker
 from kivy.clock import Clock
 import os
-import tkinter
-from tkinter import filedialog
 from kivymd.uix.list import OneLineAvatarIconListItem
 from kivymd.font_definitions import theme_font_styles
 import os
 from kivy.properties import  StringProperty,BooleanProperty,ListProperty
 from kivymd.uix.expansionpanel import MDExpansionPanel, MDExpansionPanelTwoLine
+from kivy.uix.filechooser import FileChooserIconView
+from kivy.uix.popup import Popup
 import os
 from datetime import date
 from datetime import datetime
 import sys
 import threading
 import json
-import re
-from setup_config import SHOP_ID,SHOP_NAME,TITLE
+import shutil
+from setup_config import SHOP_KEY,SHOP_NAME,TITLE
 from system.send_mail import send_email
 from system.pdf_gen import excel 
 from system.pdf_gen import creating
+from pathlib import Path
+import uuid
+import pandas as pd
 
 """
 
-------------------- shop_id -------------------
+------------------- shop_KEY -------------------
 
-    1   :   haris
-    2   :   tukkae
+    HARIS   :   haris
+    TUKKAE   :   tukkae
 
 -----------------------------------------------
 
@@ -72,18 +75,41 @@ mouth = {
         "December":"ธันวาคม"
     }
 
+font_path = Path(__file__).parent / "data" / "font" / "THSarabunNew.ttf"
+font_posix = font_path.as_posix()
+
 class Content(BoxLayout):
     pass
+
+class FileChooser(Popup):
+    def __init__(self, on_file_selected, **kwargs):
+        super().__init__(title="Choose Excel File", size_hint=(0.9, 0.9), **kwargs)
+        self.filechooser = FileChooserIconView(path=os.getcwd(),filters=["*.xlsx"])
+        self.content = self.filechooser
+        self.on_file_selected = on_file_selected
+        self.filechooser.bind(on_submit=self._file_chosen)
+
+    def _file_filter(self, folder, file):
+        return not os.path.isdir(file)
+
+    def _file_chosen(self, instance, selection, touch):
+        if selection:
+            self.dismiss()
+            self.on_file_selected(selection[0]) 
 
 class list_container(IRightBodyTouch, MDBoxLayout):
     adaptive_height=True
 
 class SlipMaker(MDScreen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.updating_checkboxes = False
+
     def on_start(self):
         pass
 
     excel_path = StringProperty("Please select file")
-    going_to_make_slip = []
+    going_to_make_slip = {}
     excel_object:excel = None
     total_individual_checkbox = 0
 
@@ -98,6 +124,12 @@ class SlipMaker(MDScreen):
         gmail_interval()
         self.progress_dialog.title = "Complete !!"
         self.progress_dialog.dismiss()
+        self.going_to_make_slip = {}
+
+        for id_key, widget in self.ids.items():
+            if 'checkbox_maker_' in id_key and hasattr(widget, 'active'):
+                widget.active = False
+                
         snackbar = MDSnackbar(
                 MDLabel(
                 text="Dowload Complete !",
@@ -113,7 +145,7 @@ class SlipMaker(MDScreen):
 
     def update_progress_slip_bar(self, data):
         self.ids['progress_slip_bar'].value = data['percentage']
-        self.ids['label_slip'].text = f"{int(data['percentage'])}% creating file for {data['branch']}/{data['current']}"
+        self.ids['label_slip'].text = f"{int(data['percentage'])}% creating {data['file']} file for {data['branch']}/{data['current']}"
 
     def start_creating_slip(self, instance, value:date, date_range):
         self.progress_dialog = MDDialog(
@@ -139,6 +171,7 @@ class SlipMaker(MDScreen):
         self.excel_object.call_back = self.call_back_create_slip
         thread = threading.Thread(target=self.excel_object.extract_convert, args=(self.going_to_make_slip,value,))
         thread.start()
+        # self.excel_object.extract_convert(self.going_to_make_slip,value)
         gmail_interval.cancel()
         employee_interval.cancel()
 
@@ -171,7 +204,7 @@ class SlipMaker(MDScreen):
                         on_release=self.select_date
                     )
         self.confirm_makeslip_dialog = MDDialog(
-            title=f'[size=28][font=sarabunBold]Are you sure to start making slip for {len(self.going_to_make_slip)} people?[/font][/size]',
+            title=f'[size=28][font=sarabunBold]Are you sure to start making slip for {self.ids['number'].text } people?[/font][/size]',
             text='[size=20][font=sarabun]This process can not be canceled make sure you are ready[/font][/size]',
             type="simple",
             radius=[20, 7, 20, 7],
@@ -179,36 +212,44 @@ class SlipMaker(MDScreen):
         )
         self.confirm_makeslip_dialog.open()
     
-    def individual_selected(self,button:MDCheckbox,pos):
-        text = button.parent.parent.parent.text
-        pattern = r'\[.*?\]\d+.(.*?)\[/.*?]'
-        result = re.search(pattern, text)
-        name = result.group(1)
-        if button.active:
-            self.going_to_make_slip.append(name)
+    def individual_selected(self,button:MDCheckbox,val):
+        if self.updating_checkboxes:
+            return
+        
+        branch = getattr(button, 'branch', None)
+        emp_id = getattr(button, 'emp_id', None)
+        if not branch or not emp_id:
+            return
+
+        if val:
+            self.going_to_make_slip.setdefault(branch, []).append(emp_id)
         else:
             try:
-                self.going_to_make_slip.remove(name)
-            except:pass
+                self.going_to_make_slip[branch].remove(emp_id)
+            except Exception as e:print(e)
 
-        true_state = len(self.going_to_make_slip)
-        self.ids['number'].text = str(true_state)
-        if true_state > 0:
-            self.ids.create_slip.disabled=False
-        else:
-            self.ids.create_slip.disabled=True
+        self.update_selected_stat()
 
-        if true_state == self.total_individual_checkbox:
-            self.ids.all_select.active = True
-        else:
-            self.ids.all_select.active = False
+    def update_selected_stat(self):
+        total_selected = sum(len(v) for v in self.going_to_make_slip.values())
+        self.ids['number'].text = str(total_selected)
+        self.ids.create_slip.disabled = total_selected <= 0
+        self.ids.all_select.active = total_selected == self.total_individual_checkbox
 
-
-    def all_selected(self,button:MDRaisedButton):
+    def all_selected(self,button:MDRaisedButton,val):
+        self.updating_checkboxes = True
         state = button.active
-        for ids in self.ids: 
-            if 'checkbox_maker_' in ids:
-                self.ids[ids].active = state
+        self.going_to_make_slip.clear()
+        for id_key, widget in self.ids.items():
+            if 'checkbox_maker_' in id_key and hasattr(widget, 'active'):
+                widget.active = state
+                branch = getattr(widget, 'branch', None)
+                emp_id = getattr(widget, 'emp_id', None)
+                if state:
+                    self.going_to_make_slip.setdefault(branch, []).append(emp_id)
+
+        self.update_selected_stat()
+        self.updating_checkboxes = False
 
     def create_employee_list(self,dt):
         fram1 = MDBoxLayout(
@@ -247,34 +288,34 @@ class SlipMaker(MDScreen):
                 halign= 'left',
             ) 
         self.ids["all_select"] = all_checkbox
-        all_checkbox.bind(on_press=self.all_selected)
+        all_checkbox.bind(active=self.all_selected)
         fram2.add_widget(all_checkbox)
         fram1.add_widget(fram2)
         fram1.add_widget(MDSeparator())
         scroll = MDScrollView()  
         mdlst_slip = MDList()
         self.ids['lst'] = mdlst_slip
-        for branch in self.excel_object.sources:
-            amount = self.excel_object.get_round(branch)
+        for branchName,df in self.excel_object.dfs.items():
+            amount = self.excel_object.get_round(branchName)
             content = MDBoxLayout()
             content.adaptive_height = True
             content.orientation = 'vertical'
-            self.ids[branch.title+'slip'] = content 
+            self.ids[branchName+'slip'] = content 
             panel = MDExpansionPanel(
                     icon="office-building-outline",
                     content=content,
                     panel_cls=MDExpansionPanelTwoLine(
-                        text=f"[size=25]{branch.title.replace('D','')}[/size]",
+                        text=f"[size=25]{branchName.replace('D','')}[/size]",
                         secondary_text=f"{amount} คน",
                         font_style= "sarabunBold",
                         secondary_font_style= "sarabunBold"
                     )
                 )
             mdlst_slip.add_widget(panel)
-            for num,rows in enumerate(range(amount),1):
-                rows += 3
+
+            for i,employee in df.iterrows():
                 item = OneLineAvatarIconListItem(
-                    text=f"[size=20]{num}.{self.excel_object.get_value(branch,2,rows)}[/size]",
+                    text=f"[size=20]{employee['รหัสพนักงาน']} | {self.excel_object.get_value(employee,"ชื่อ-นามสกุล")}[/size]",
                     font_style = "sarabun",
                 )
                 face = IconLeftWidget(
@@ -283,13 +324,15 @@ class SlipMaker(MDScreen):
                 check = list_container()
                 checkbox = MDCheckbox()
                 checkbox.bind(active=self.individual_selected)
+                checkbox.branch = branchName
+                checkbox.emp_id = employee['รหัสพนักงาน']
                 self.total_individual_checkbox += 1
-                self.ids[f"checkbox_maker_{datetime.now().strftime('%f')}"] = checkbox
+                self.ids[f"checkbox_maker_{uuid.uuid4().hex}"] = checkbox
                 checkbox.color_active = self.theme_cls.accent_light
                 item.add_widget(face)
                 check.add_widget(checkbox)
                 item.add_widget(check)
-                b = str(branch.title) +'slip'
+                b = str(branchName) +'slip'
                 self.ids[b].add_widget(item)
         scroll.add_widget(mdlst_slip)
         fram1.add_widget(scroll)
@@ -321,54 +364,69 @@ class SlipMaker(MDScreen):
         fram1.add_widget(screen)
         self.ids.box1.add_widget(fram1)
 
+    def exit_manager(self, *args):
+        self.file_manager.close()
+    
+    def select_path(self, path: str):
+        self.exit_manager()
+        self.excel_path = os.path.basename(path)
+        self.excel_object = excel(path=path)
+        Clock.schedule_once(self.create_employee_list)
+
     def on_browse(self):
-        path = self.file_open()
-        if path:
-            self.excel_object = excel(path = path)
-            self.going_to_make_slip = []
-            try:
-                self.ids.box1.remove_widget(self.ids.fram1)
-            except:pass
-            Clock.schedule_once(self.create_employee_list)
-            self.snackbar = MDSnackbar(
-                MDLabel(
-                text="Upload Complete !",
-                font_name = 'sarabun',
-                text_color=self.theme_cls.opposite_bg_normal
-            ),
-            pos_hint={"center_x": 0.5},
-            size_hint_x=0.5,
-            md_bg_color="#ffffff"
-            )
-            self.snackbar.open()
+        def handle_file(path):
+            if path.endswith((".xlsx", ".xls")):
+                self.excel_object = excel(path=path)
+                self.going_to_make_slip = {}
+                try:
+                    self.ids.box1.remove_widget(self.ids.fram1)
+                except:
+                    pass
+                Clock.schedule_once(self.create_employee_list)
+                self.snackbar = MDSnackbar(
+                    MDLabel(
+                        text="Upload Complete!",
+                        font_name='sarabun',
+                        text_color=self.theme_cls.opposite_bg_normal
+                    ),
+                    pos_hint={"center_x": 0.5},
+                    size_hint_x=0.5,
+                    md_bg_color="#ffffff"
+                )
+                self.snackbar.open()
+            else:
+                print("Not an Excel file")
+
+        file_popup = FileChooser(on_file_selected=handle_file)
+        file_popup.open()
 
     def file_open(self):
-        root = tkinter.Tk()
-        root.withdraw()
-        # root.iconbitmap("YOUR_IMAGE.ico")
-        currdir = os.getcwd()
-        tempdir = filedialog.askopenfilename(parent=root, initialdir=currdir, title='Please select excel file',filetypes=[("Excel files",".xlsx .xls")])
-        path = None
-        if len(tempdir) > 0:
-            path = tempdir
-            self.excel_path = os.path.basename(tempdir)
+        # root = tkinter.Tk()
+        # root.withdraw()
+        # # root.iconbitmap("YOUR_IMAGE.ico")
+        path = filechooser.open_file(title="Pick a CSV file..", 
+                             filters=[("Comma-separated Values", "*.csv")])
+        # path = None
+        # if len(tempdir) > 0:
+        #     path = tempdir
+        #     self.excel_path = os.path.basename(tempdir)
         return path
     
 class CustomOneLineAvatarIconListItem(OneLineAvatarIconListItem):
-    def __init__(self, path,email,name,branch, file_name,*args, **kwargs):
+    def __init__(self,*args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.path = path
-        self.name = name
-        self.email = email
-        self.branch = branch
-        self.file_name = file_name
 
 class GmailSender(MDScreen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.updating_checkboxes = False
+
     going_to_send = []
     recent_employee = 0
     total_individual_checkbox = 0
     def on_start(self):
         global gmail_interval
+        self.update_lst(force=True)
         gmail_interval = Clock.schedule_interval(self.update_lst,0.5)
 
     def done_send_email(self):
@@ -458,64 +516,76 @@ class GmailSender(MDScreen):
         )
         self.confirm_sendemail_dialog.open()
 
-    def update_lst(self,dt):
+    def update_lst(self,force=False):
         if creating:
             return
         
-        f = []
-        for path in os.listdir(f'slip/{SHOP_NAME}'):
-            for i in os.listdir(f'slip/{SHOP_NAME}/'+path):
-                f.append(i)
+        count = 0
+        try:
+            for branch in os.listdir(self.get_storage_dir()):
+                branch_path = self.get_storage_dir() / branch
+                if branch_path.is_dir(): 
+                    count += len(os.listdir(branch_path))
+        except Exception as e:print(e)
 
-        if len(f) != self.recent_employee:
+        if (count != self.recent_employee):
             self.ids['box_email'].clear_widgets()
             
-            if len(f) != 0:
+            if count != 0:
                 Clock.schedule_once(lambda dt: self.add_lst())    
             else:
                 Clock.schedule_once(lambda dt: self.no_employee_label())
                 self.ids.sendemail_button.disabled=True
                 self.ids.sendemail_button.text = f' 0       Send email               '
-            self.recent_employee = len(f)
+            self.recent_employee = count
 
-    def individual_selected(self,button:MDCheckbox,pos):
-        data = button.parent.parent.parent
-        name,email,checker,ofmonth,createat = data.file_name[:-4].split(',')
-        payload={
-            'path':data.path,
-            'name':data.name,
-            'email':data.email,
-            'branch':data.branch,
-            'file_name':data.file_name,
-            'ofmonth':ofmonth,
-            'createat':createat
-        }
-        if button.active:
-            self.going_to_send.append(payload)
+    def individual_selected(self,button:MDCheckbox,val):
+        if self.updating_checkboxes:
+            return
+        
+        data = getattr(button, 'data', None)
+        if not data:
+            return
+        
+        if val:
+            self.going_to_send.append(data)
         else:
             try:
-                self.going_to_send.remove(payload)
+                self.going_to_send.remove(data)
             except:pass
 
-        true_state = len(self.going_to_send)
-        self.ids.sendemail_button.text = f' {true_state}       Send email               '
+        self.update_selected_stat()
 
-        if true_state > 0:
-            self.ids.sendemail_button.disabled=False
-        else:
-            self.ids.sendemail_button.disabled=True
+    def update_selected_stat(self):
+        total_selected = len(self.going_to_send)
+        self.ids.sendemail_button.text = f' {total_selected}       Send email               '
+        self.ids.sendemail_button.disabled = total_selected <= 0
+        self.ids.all_select_email.active = total_selected == self.total_individual_checkbox
 
-        if true_state == self.total_individual_checkbox:
-            self.ids.all_select_email.active = True
-        else:
-            self.ids.all_select_email.active = False
-
-
-    def all_selected(self,button:MDRaisedButton):
+    def all_selected(self,button:MDRaisedButton,val):
+        self.updating_checkboxes = True
         state = button.active
-        for ids in self.ids: 
-            if 'checkbox_email_' in ids:
-                self.ids[ids].active = state
+        self.going_to_send.clear()
+        for id_key, widget in self.ids.items(): 
+            if 'checkbox_email_' in id_key and hasattr(widget, 'active'):
+                widget.active = state
+                data = getattr(widget, 'data', None)
+                if state:
+                    self.going_to_send.append(data)
+
+        self.update_selected_stat()
+        self.updating_checkboxes = False
+
+    def get_storage_dir(self):
+        output = Path.cwd() / "storage" / SHOP_NAME
+        return output
+    
+    def getMetaData(self,branch,dirName):
+        metaPath = self.get_storage_dir() / branch / dirName / "metadata.json"
+        with open(metaPath,'r',encoding='utf-8') as f:
+            data = json.load(f)
+
+        return data
 
     def add_lst(self):
         self.going_to_send=[]
@@ -540,7 +610,7 @@ class GmailSender(MDScreen):
             pos_hint={'center_y':0.65},
             halign= 'left',
         ) 
-        all_checkbox.bind(on_press=self.all_selected)
+        all_checkbox.bind(active=self.all_selected)
         self.ids["all_select_email"] = all_checkbox
         fram1.add_widget(all_checkbox)
         self.ids['box_email'].add_widget(fram1)
@@ -549,7 +619,11 @@ class GmailSender(MDScreen):
         mdlst_employee = MDList()
         scroll.add_widget(mdlst_employee)
 
-        for branch in os.listdir(f'slip/{SHOP_NAME}'):
+        print(self.get_storage_dir())
+        for branch in os.listdir(self.get_storage_dir()):
+            branch_path = self.get_storage_dir() / branch
+            if not branch_path.is_dir(): 
+                continue
             content = MDBoxLayout()
             content.adaptive_height = True
             content.orientation = 'vertical'
@@ -560,29 +634,31 @@ class GmailSender(MDScreen):
                 pos_hint={'center_y':1},
                 panel_cls=MDExpansionPanelTwoLine(
                     text=f"[size=25]{branch}[/size]",
-                    secondary_text=f"{len(os.listdir(f'slip/{SHOP_NAME}/'+branch))}คน",
+                    secondary_text=f"{len(os.listdir(branch_path))}คน",
                     font_style= "sarabunBold",
                     secondary_font_style= "sarabunBold"
                 )
             )
             #39
-            for num,filename in enumerate(os.listdir(f'slip/{SHOP_NAME}/'+branch),1):
+            for num,filename in enumerate(os.listdir(branch_path),1):
                 # cleaned_string = regex.sub('\p{M}', '',f"{num}.{filename.split(',')[0]}")
                 # name_lenght = len(cleaned_string)
                 # less = 39 - name_lenght
                 # space = ' '*less)
                 try:
-                    name,email,checker,ofmonth,createat = filename[:-4].split(',')
+                    data = self.getMetaData(branch,filename)
+                    name = data.get('employee_name')
+                    email = data.get('email')
+                    payPeriod = data.get('pay_period')
+                    create = data.get('created_at')
+                    createdAt = datetime.strptime(create,'%d %B %Y %H:%M:%S')
+                    mailSent = data.get('mail_sent')
+
                     item = CustomOneLineAvatarIconListItem(
-                        text=f"[size=20]{num}.{name}   |   {email}   |   Salary of [b]{ofmonth}[/b]   [color=9C9B9B]Create at {datetime.strptime(createat,'%d%m%y%H%M%S').strftime('%d/%m/%y %H:%M')}[/color][/size]",
-                        font_style = "sarabun",
-                        path= os.path.join('slip',SHOP_NAME,branch,filename),
-                        email=filename.split(',')[1],
-                        name=filename.split(',')[0],
-                        branch=branch,
-                        file_name=filename
+                        text=f"[size=20]{num}.{name}   |   {email}   |   Salary of [b]{payPeriod}[/b]   [color=9C9B9B]Create at {createdAt.strftime('%d/%m/%y %H:%M')}[/color][/size]",
+                        font_style = "sarabun"
                     )
-                    if checker == '0':
+                    if not mailSent:
                         icon = 'account-alert'
                     else:
                         icon = 'account-check'
@@ -592,6 +668,7 @@ class GmailSender(MDScreen):
                     check = list_container()
                     checkbox = MDCheckbox()
                     checkbox.bind(active=self.individual_selected)
+                    checkbox.data = data
                     self.total_individual_checkbox += 1
                     self.ids[f"checkbox_email_{datetime.now().strftime('%f')}"] = checkbox
                     checkbox.color_active = self.theme_cls.accent_light
@@ -600,7 +677,7 @@ class GmailSender(MDScreen):
                     item.add_widget(check)
                     b = str(branch.title)+'email'
                     self.ids[b].add_widget(item)
-                except:pass
+                except Exception as e:print(e)
 
             mdlst_employee.add_widget(panel)
         self.ids['box_email'].add_widget(scroll)
@@ -619,42 +696,58 @@ class GmailSender(MDScreen):
         self.ids['box_email'].add_widget(label)
 
 class Employee(MDScreen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.updating_checkboxes = False
+
     recent_employee = 0
     total_individual_checkbox = 0
     going_to_delete = []
 
     def on_start(self):
         global employee_interval
-        employee_interval = Clock.schedule_interval(self.update_lst,0.5)
+        self.update_lst(force=False)
+        employee_interval = Clock.schedule_interval(self.update_lst,1.5)
 
-    def update_lst(self,dt):
+    def update_lst(self,force=False):
         if creating == True:
             return
         
-        f = []
-        for path in os.listdir(f'slip/{SHOP_NAME}'):
-            for i in os.listdir(f'slip/{SHOP_NAME}/'+path):
-                f.append(i)
-        
-        if len(f) != self.recent_employee:
+        count = 0
+        try:
+            for branch in os.listdir(self.get_storage_dir()):
+                branch_path = self.get_storage_dir() / branch
+                if not branch_path.is_dir(): 
+                    continue
+                count += len(os.listdir(branch_path))
+
+                countdir = len(os.listdir(branch_path))
+
+                if(countdir==0):
+                    os.removedirs(self.get_storage_dir() / branch)
+
+                count+= countdir
+        except Exception as e:print(e)
+
+        if (count != self.recent_employee):
             self.ids['box_employee'].clear_widgets()
-            if len(f) != 0:
+            if count != 0:
                 Clock.schedule_once(lambda dt: self.add_lst())
             else:
                 Clock.schedule_once(lambda dt: self.no_employee_label())
                 self.ids.delete_button.disabled=True
                 self.ids.delete_label_count.text = '0'
-            self.recent_employee = len(f)
+            self.recent_employee = count
 
     def deletion(self, path):
         try:
-            os.remove(path)
+            shutil.rmtree(path)
         except Exception as e:
             print(e)
 
     def delete_selected(self):
-        for person in self.going_to_delete:
-            thread = threading.Thread(target=self.deletion, args=(person['path'],))
+        for path in self.going_to_delete:
+            thread = threading.Thread(target=self.deletion, args=(path,))
             thread.start()      
         snackbar = MDSnackbar(
                 MDLabel(
@@ -669,42 +762,54 @@ class Employee(MDScreen):
             )
         snackbar.open()
 
-    def individual_selected(self,button:MDCheckbox,pos):
-        data = button.parent.parent.parent
-        payload={
-            'path':data.path,
-            'name':data.name,
-            'email':data.email,
-            'branch':data.branch,
-            'file_name':data.file_name
-        }
-        if button.active:
-            self.going_to_delete.append(payload)
+    def individual_selected(self,button:MDCheckbox,val):
+        if self.updating_checkboxes:
+            return
+        
+        path = getattr(button, 'path', None)
+        if not path:
+            return
+        
+        if val:
+            self.going_to_delete.append(path)
         else:
             try:
-                self.going_to_delete.remove(payload)
+                self.going_to_delete.remove(path)
             except:pass
-        true_state = len(self.going_to_delete)
+        
+        self.update_selected_stat()
 
-        self.ids.delete_label_count.text = str(true_state)
+    def update_selected_stat(self):
+        total_selected = len(self.going_to_delete)
+        self.ids.delete_label_count.text = str(total_selected)
+        self.ids.delete_button.disabled = total_selected <= 0
+        self.ids.all_select_employee.active = total_selected == self.total_individual_checkbox
 
-        if true_state > 0:
-            self.ids.delete_button.disabled=False
-        else:
-            self.ids.delete_button.disabled=True
-
-        if true_state == self.total_individual_checkbox:
-            self.ids.all_select_employee.active = True
-        else:
-            self.ids.all_select_employee.active = False
-
-
-    def all_selected(self,button:MDRaisedButton):
+    def all_selected(self,button:MDRaisedButton,val):
+        print(val)
+        self.updating_checkboxes = True
         state = button.active
-        for ids in self.ids: 
-            if 'checkbox_employee_' in ids:
-                self.ids[ids].active = state
+        self.going_to_delete.clear()
+        for id_key, widget in self.ids.items(): 
+            if 'checkbox_employee_' in id_key and hasattr(widget, 'active'):
+                widget.active = state
+                path = getattr(widget, 'path', None)
+                if state:
+                    self.going_to_delete.append(path)
+
+        self.update_selected_stat()
+        self.updating_checkboxes = False
                 
+    def get_storage_dir(self):
+        output = Path.cwd() / "storage" / SHOP_NAME
+        return output
+    
+    def getMetaData(self,branch,dirName):
+        metaPath = self.get_storage_dir() / branch / dirName / "metadata.json"
+        with open(metaPath,'r',encoding='utf-8') as f:
+            data = json.load(f)
+
+        return data
     
     def add_lst(self):
         self.going_to_delete=[]
@@ -729,7 +834,7 @@ class Employee(MDScreen):
             pos_hint={'center_y':0.65},
             halign= 'left',
         ) 
-        all_checkbox.bind(on_press=self.all_selected)
+        all_checkbox.bind(active=self.all_selected)
         self.ids["all_select_employee"] = all_checkbox
         fram1.add_widget(all_checkbox)
         self.ids['box_employee'].add_widget(fram1)
@@ -738,7 +843,10 @@ class Employee(MDScreen):
         mdlst_employee = MDList()
         scroll.add_widget(mdlst_employee)
 
-        for branch in os.listdir(f'slip/{SHOP_NAME}'):
+        for branch in os.listdir(self.get_storage_dir()):
+            branch_path = self.get_storage_dir() / branch
+            if not branch_path.is_dir(): 
+                continue
             content = MDBoxLayout()
             content.adaptive_height = True
             content.orientation = 'vertical'
@@ -749,22 +857,24 @@ class Employee(MDScreen):
                 pos_hint={'center_y':1},
                 panel_cls=MDExpansionPanelTwoLine(
                     text=f"[size=25]{branch}[/size]",
-                    secondary_text=f"{len(os.listdir(f'slip/{SHOP_NAME}/'+branch))}คน",
+                    secondary_text=f"{len(os.listdir(self.get_storage_dir() / branch))}คน",
                     font_style= "sarabunBold",
                     secondary_font_style= "sarabunBold"
                 )
             )
-            for num,filename in enumerate(os.listdir(f'slip/{SHOP_NAME}/'+branch),1):
+            for num,filename in enumerate(os.listdir(self.get_storage_dir() / branch),1):
                     try:
-                        name,email,checker,ofmonth,createat = filename[:-4].split(',')
+                        data = self.getMetaData(branch,filename)
+                        name = data.get('employee_name')
+                        email = data.get('email')
+                        payPeriod = data.get('pay_period')
+                        create = data.get('created_at')
+                        createdAt = datetime.strptime(create,'%d %B %Y %H:%M:%S')
+                        mailSent = data.get('mail_sent')
+
                         item = CustomOneLineAvatarIconListItem(
-                            text=f"[size=20]{num}.{name}   |   {email}   |   Salary of [b]{ofmonth}[/b]   [color=9C9B9B]Create at {datetime.strptime(createat,'%d%m%y%H%M%S').strftime('%d/%m/%y %H:%M')}[/color][/size]",
+                            text=f"[size=20]{num}.{name}   |   {email}   |   Salary of [b]{payPeriod}[/b]   [color=9C9B9B]Create at {createdAt.strftime('%d/%m/%y %H:%M')}[/color][/size]",
                             font_style = "sarabun",
-                            path= os.path.join('slip',SHOP_NAME,branch,filename),
-                            email=filename.split(',')[1],
-                            name=filename.split(',')[0],
-                            branch=branch,
-                            file_name=filename
                         )
                         face = IconLeftWidget(
                             icon='account'
@@ -772,6 +882,7 @@ class Employee(MDScreen):
                         check = list_container()
                         checkbox = MDCheckbox()
                         checkbox.bind(active=self.individual_selected)
+                        checkbox.path = self.get_storage_dir() / branch /filename
                         self.total_individual_checkbox += 1
                         self.ids[f"checkbox_employee_{datetime.now().strftime('%f')}"] = checkbox
                         checkbox.color_active = self.theme_cls.accent_light
@@ -807,7 +918,7 @@ class SliperApp(MDApp):
         self.title = TITLE
         self.icon = f'data\icon\{SHOP_NAME}.png'
         LabelBase.register(name='sarabun',
-            fn_regular=r'data\font\THSarabunNew.ttf',
+            fn_regular=font_posix,
         )
         theme_font_styles.append('sarabun')
         self.theme_cls.font_styles["sarabun"] = [
@@ -817,7 +928,7 @@ class SliperApp(MDApp):
             0.15,
         ]
         LabelBase.register(name='sarabunBold',
-            fn_regular=r'data\font\THSarabunNew Bold.ttf'
+            fn_regular=font_posix
         )
         theme_font_styles.append('sarabunBold')
         self.theme_cls.font_styles["sarabunBold"] = [
@@ -833,13 +944,20 @@ class SliperApp(MDApp):
         return screen
     
     def on_start(self):
-       if not os.path.exists(f'slip'):
+        if not os.path.exists(f'slip'):
             os.mkdir(f'slip')
 
-       if not os.path.exists(f'slip/{SHOP_NAME}'):
+        if not os.path.exists(f'storage'):
+            os.mkdir(f'storage')
+
+        if not os.path.exists(f'slip/{SHOP_NAME}'):
             os.mkdir(f'slip/{SHOP_NAME}')
-       sc_lst = self.root.ids.mana.screen_names
-       for screen in sc_lst:
+        
+        if not os.path.exists(f'storage/{SHOP_NAME}'):
+            os.mkdir(f'storage/{SHOP_NAME}')
+
+        sc_lst = self.root.ids.mana.screen_names
+        for screen in sc_lst:
            self.root.ids.mana.get_screen(screen).on_start()
 
 
