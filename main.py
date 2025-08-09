@@ -38,7 +38,7 @@ import sys
 import threading
 import json
 import shutil
-from setup_config import SHOP_ID,SHOP_NAME,TITLE
+from setup_config import SHOP_KEY,SHOP_NAME,TITLE
 from system.send_mail import send_email
 from system.pdf_gen import excel 
 from system.pdf_gen import creating
@@ -48,10 +48,10 @@ import pandas as pd
 
 """
 
-------------------- shop_id -------------------
+------------------- shop_KEY -------------------
 
-    1   :   haris
-    2   :   tukkae
+    HARIS   :   haris
+    TUKKAE   :   tukkae
 
 -----------------------------------------------
 
@@ -426,6 +426,7 @@ class GmailSender(MDScreen):
     total_individual_checkbox = 0
     def on_start(self):
         global gmail_interval
+        self.update_lst(force=True)
         gmail_interval = Clock.schedule_interval(self.update_lst,0.5)
 
     def done_send_email(self):
@@ -515,17 +516,19 @@ class GmailSender(MDScreen):
         )
         self.confirm_sendemail_dialog.open()
 
-    def update_lst(self,dt):
+    def update_lst(self,force=False):
         if creating:
             return
         
         count = 0
         try:
             for branch in os.listdir(self.get_storage_dir()):
-                count+= len(os.listdir(self.get_storage_dir() / branch))
-        except:pass
+                branch_path = self.get_storage_dir() / branch
+                if branch_path.is_dir(): 
+                    count += len(os.listdir(branch_path))
+        except Exception as e:print(e)
 
-        if count != self.recent_employee:
+        if (count != self.recent_employee):
             self.ids['box_email'].clear_widgets()
             
             if count != 0:
@@ -616,7 +619,11 @@ class GmailSender(MDScreen):
         mdlst_employee = MDList()
         scroll.add_widget(mdlst_employee)
 
+        print(self.get_storage_dir())
         for branch in os.listdir(self.get_storage_dir()):
+            branch_path = self.get_storage_dir() / branch
+            if not branch_path.is_dir(): 
+                continue
             content = MDBoxLayout()
             content.adaptive_height = True
             content.orientation = 'vertical'
@@ -627,13 +634,13 @@ class GmailSender(MDScreen):
                 pos_hint={'center_y':1},
                 panel_cls=MDExpansionPanelTwoLine(
                     text=f"[size=25]{branch}[/size]",
-                    secondary_text=f"{len(os.listdir(self.get_storage_dir() / branch))}คน",
+                    secondary_text=f"{len(os.listdir(branch_path))}คน",
                     font_style= "sarabunBold",
                     secondary_font_style= "sarabunBold"
                 )
             )
             #39
-            for num,filename in enumerate(os.listdir(self.get_storage_dir() / branch),1):
+            for num,filename in enumerate(os.listdir(branch_path),1):
                 # cleaned_string = regex.sub('\p{M}', '',f"{num}.{filename.split(',')[0]}")
                 # name_lenght = len(cleaned_string)
                 # less = 39 - name_lenght
@@ -699,23 +706,30 @@ class Employee(MDScreen):
 
     def on_start(self):
         global employee_interval
+        self.update_lst(force=False)
         employee_interval = Clock.schedule_interval(self.update_lst,1.5)
 
-    def update_lst(self,dt):
+    def update_lst(self,force=False):
         if creating == True:
             return
         
         count = 0
         try:
             for branch in os.listdir(self.get_storage_dir()):
-                countdir = len(os.listdir(self.get_storage_dir() / branch))
+                branch_path = self.get_storage_dir() / branch
+                if not branch_path.is_dir(): 
+                    continue
+                count += len(os.listdir(branch_path))
+
+                countdir = len(os.listdir(branch_path))
+
                 if(countdir==0):
                     os.removedirs(self.get_storage_dir() / branch)
-            
-                count+= countdir
-        except:pass
 
-        if count != self.recent_employee:
+                count+= countdir
+        except Exception as e:print(e)
+
+        if (count != self.recent_employee):
             self.ids['box_employee'].clear_widgets()
             if count != 0:
                 Clock.schedule_once(lambda dt: self.add_lst())
@@ -830,6 +844,9 @@ class Employee(MDScreen):
         scroll.add_widget(mdlst_employee)
 
         for branch in os.listdir(self.get_storage_dir()):
+            branch_path = self.get_storage_dir() / branch
+            if not branch_path.is_dir(): 
+                continue
             content = MDBoxLayout()
             content.adaptive_height = True
             content.orientation = 'vertical'

@@ -97,5 +97,7 @@
   "generatedon": "Slip generated on",
   "contactHR": "For inquiries, please contact HR department",
   "pay_period": "Pay Period",
-  "tax_id": "Tax Id"
+  "tax_id": "Tax Id",
+  "download_below": "Download Your Payslip Below",
+  "company_address":"Company Address"
 }

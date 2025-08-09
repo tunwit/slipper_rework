@@ -1,25 +1,15 @@
-from unittest import mock
-# Set max font family value to 100
-p = mock.patch('openpyxl.styles.fonts.Font.family.max', new=100)
-p.start()
-
 import os
 import json
 from pathlib import Path
-import time
 from datetime import date
 from datetime import datetime
-import openpyxl
-from openpyxl import load_workbook
 import shutil
 from setup_config import SLIP_DETAIL, LOGO_PATH, SHOP_NAME
-from openpyxl.styles import Font
 import pandas as pd
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 import asyncio
 from pyppeteer import launch
-import threading
 
 creating = False
 
@@ -50,6 +40,9 @@ class excel():
         self.total_rows = 0
         self.jobs = []
         self.progress_percent = 0
+        self.pages = []
+        self.concurrent_count = 5
+        self.semaphore = asyncio.Semaphore(self.concurrent_count)
 
     def ex_to_df(self):
         dfs = pd.read_excel(self.path,header=1,sheet_name=None)
@@ -136,25 +129,34 @@ class excel():
         else:
             return f"{value}"
     
-    async def render_to_pdf(self,semaphore,browser, html_path, pdf_path, path_storage, context):
-        async with semaphore:
+    async def render_to_pdf(self, html_pdf, pdf_path, path_storage, context):
+        async with self.semaphore:
+            page = self.pages.pop()
+            try:
+                await page.setContent(html_pdf)
+                await page.pdf({
+                    'path': pdf_path,
+                    'format': 'A4',
+                    'landscape': False,
+                    'printBackground': True,
+                    'preferCSSPageSize': True,
+                    'margin': {'top': '10mm', 'bottom': '10mm', 'left': '10mm', 'right': '10mm'},
+                })
+            finally:
+                self.pages.append(page)
+            
+        #create pay slip pdf
+        file_name = path_storage / "pay_slip_pdf"
+        self.createMetaData(path_storage,context)
+        key = f'{context['employee']["id"]}_{context['employee']['name']}'.strip()
+        path_slip = self.slip_dir / context['employee']['branch'] / key
+        shutil.copy2(file_name.with_suffix(".pdf"), path_slip.with_suffix(".pdf"))
+        self.progress(current=context['employee']["name"],branch=context['employee']['branch'],file='pdf')
+
+    async def init_pages(self, browser, count=5):
+        for _ in range(count):
             page = await browser.newPage()
-            await page.goto(f'file:///{html_path}', waitUntil='networkidle0')
-            await page.pdf({
-                'path': pdf_path,
-                'format': 'A4',
-                'landscape': False,
-                'printBackground': True,
-                'preferCSSPageSize': True,
-                'margin': {'top': '10mm', 'bottom': '10mm', 'left': '10mm', 'right': '10mm'},
-            })
-            #create pay slip pdf
-            file_name = path_storage / "pay_slip"
-            self.createMetaData(path_storage,context,file_name)
-            key = f'{context['employee']["id"]}_{context['employee']['name']}'.strip()
-            path_slip = self.slip_dir / context['employee']['branch'] / key
-            shutil.copy2(file_name.with_suffix(".pdf"), path_slip.with_suffix(".pdf"))
-            self.progress(current=context['employee']["name"],branch=context['employee']['branch'],file='pdf')
+            self.pages.append(page)
 
     async def html_to_pdf_batch(self):
             if os.name == 'nt':
@@ -166,56 +168,74 @@ class excel():
                         handleSIGTERM=False,
                         handleSIGHUP=False,
                         dumpio=False, 
-                        args=['--no-sandbox'])
-            semaphore = asyncio.Semaphore(5)
+                        args=['--no-sandbox',
+                        '--disable-setuid-sandbox',
+                        '--disable-dev-shm-usage',
+                        '--disable-extensions',
+                        '--disable-background-networking',
+                        '--disable-sync',
+                        '--disable-translate',
+                        '--hide-scrollbars',
+                        '--metrics-recording-only',
+                        '--mute-audio',
+                        '--no-first-run',
+                        '--safebrowsing-disable-auto-update',])
             tasks = []
-            for html_path, pdf_path, path_storage, context in self.jobs:
-                task = self.render_to_pdf(semaphore,browser, html_path, pdf_path, path_storage, context)
+            await self.init_pages(browser, count=self.concurrent_count)
+            for html_pdf, pdf_path, path_storage, context in self.jobs:
+                task = self.render_to_pdf(html_pdf, pdf_path, path_storage, context)
                 tasks.append(task)
             await asyncio.gather(*tasks)
+
+            for page in self.pages:
+                await page.close()
+
             await browser.close()
 
 
-    def createMetaData(self,storage_path,context,file_name):
+    def createMetaData(self,storage_path,context):
+        json_file = storage_path / "metadata.json"
         meta_data = {
             "employee_id": context['employee']['id'],
             "employee_name": context['employee']['name'],
             "email": context['employee']['email'],
             "branch":context['employee']['branch'],
             "pay_period": context['payPeriod'],
-            "pdf_path": str(file_name.with_suffix(".pdf")),
-            "html_path": str(file_name.with_suffix(".html")),
+            "pdf_path": str((storage_path / "pay_slip_pdf").with_suffix(".pdf")),
+            "html_path": str((storage_path / "pay_slip_pdf").with_suffix(".html")),
+            "html_email_path": str((storage_path / "pay_slip_email").with_suffix(".html")),
+            "meta_data_path":str(json_file),
             "mail_sent": False,
             "created_at": context['timeStamp']
         }
-        json_file = storage_path / "metadata.json"
+        
         with open(json_file,'w',encoding="utf-8") as f:
             json.dump(meta_data, f, ensure_ascii=False, indent=2)
         
 
-    def build_section(self,employee,employee_data,config,date_m,t):
+    def build_section(self,employee,employee_data,date_m,t):
         earnings = [{"label" : t(field['label_key']),
                              "value":employee_data[field['key']],
                              "unit": t(field["unit_key"]),
                              "formatted": self.format_value(employee_data[field['key']], field['format_key'])}
-                             for field in config['earnings']['fields'] if field['display']]
+                             for field in SLIP_DETAIL['earnings']['fields'] if field['display']]
                 
         deduction = [{"label" : t(field['label_key']),
                         "value":employee_data[field['key']],
                         "unit": t(field["unit_key"]),
                         "formatted": self.format_value(employee_data[field['key']], field['format_key'])} 
-                        for field in config['deduction']['fields'] if field['display']]
+                        for field in SLIP_DETAIL['deduction']['fields'] if field['display']]
         
         details = [{"label" : t(field['label_key']),
                         "value":employee_data[field['key']],
                         "unit": t(field["unit_key"]),
                         "formatted": self.format_value(employee_data[field['key']], field['format_key'])} 
-                        for field in config['details']['fields'] if field['display']]
+                        for field in SLIP_DETAIL['details']['fields'] if field['display']]
         
-        net = {"label":t(config['total']['label_key']),
-                "value":employee_data[config['total']['key']],
-                "unit": t(config['total']["unit_key"]),
-                "formatted": self.format_value(employee_data[config['total']['key']], config['total']['format_key'])}
+        net = {"label":t(SLIP_DETAIL['total']['label_key']),
+                "value":employee_data[SLIP_DETAIL['total']['key']],
+                "unit": t(SLIP_DETAIL['total']["unit_key"]),
+                "formatted": self.format_value(employee_data[SLIP_DETAIL['total']['key']], SLIP_DETAIL['total']['format_key'])}
 
         total_earnings = {
             "label":t('totale'),
@@ -232,7 +252,7 @@ class excel():
         }
 
         context = {
-        "company":config['company'],
+        "company":SLIP_DETAIL['company'],
         "employee": employee,
         "sections": {
             "earnings": earnings,
@@ -256,10 +276,10 @@ class excel():
         self.re_init()
         self.total_rows = sum(len(df) for df in data.values())
         env = Environment(loader=FileSystemLoader('data/template'))
-        with open("config_2.json","r",encoding="utf8") as config:
-            config = json.load(config)['haris_slip_details']
+        
 
-        template = env.get_template(config['template'])
+        template_pdf = env.get_template(SLIP_DETAIL['template_pdf'])
+        template_email = env.get_template(SLIP_DETAIL['template_email'])
 
         #pre load langauge
         lang_th = self.get_lang('th')
@@ -287,19 +307,26 @@ class excel():
                     "branch":branch
                 }
                 
-                context = self.build_section(employee,employee_data,config,date_m,t)
+                context = self.build_section(employee,employee_data,date_m,t)
                
-                html_out = template.render(context=context,t=t)
+                html_pdf = template_pdf.render(context=context,t=t)
+                html_email = template_email.render(context=context,t=t)
+
                 key = f'{employee["id"]}_{employee['name']}'.strip()
                 path_strorage = self.storage_dir / branch / key 
 
                 #create pay slip html
                 os.makedirs(path_strorage, exist_ok=True)
-                file_name = path_strorage / "pay_slip"
+
+                file_name = path_strorage / "pay_slip_email"
                 with open(file_name.with_suffix(".html"),'w', encoding='utf-8') as f:
-                    f.write(html_out)
+                    f.write(html_email)
+
+                file_name = path_strorage / "pay_slip_pdf"
+                with open(file_name.with_suffix(".html"),'w', encoding='utf-8') as f:
+                    f.write(html_pdf)
                 
-                self.jobs.append((file_name.with_suffix(".html"), file_name.with_suffix(".pdf"),path_strorage,context))
+                self.jobs.append((html_pdf, file_name.with_suffix(".pdf"),path_strorage,context))
                 self.progress(current=employee["name"],branch=branch)
 
         asyncio.run(self.html_to_pdf_batch())

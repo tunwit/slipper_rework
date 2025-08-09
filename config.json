@@ -1,44 +1,203 @@
 {
-  "shop_id": "1",
+  "shop_key": "HARIS",
   "email_attemps": 5,
   "haris_slip_details": {
-    "email_col": 22,
-    "branch": ["B4", 0, 0],
-    "earnings": ["B9", 0, 0],
-    "warning": ["A25", 0, 0],
-    "deduction": ["F9", 0, 0],
-    "payslip": ["J1", 0, 0],
-    "details": ["K9", 0, 0],
-    "personnelcode": ["B5", "C5", 1],
-    "name": ["B6", "C6", 2],
-    "position": ["B7", "C7", 4],
-    "salary": ["B11", "C11", 5],
-    "positionallowance": ["B12", "C12", 6],
-    "otd": ["B13", "C13", 7],
-    "oth": ["B14", "C14", 8],
-    "otho": ["B15", "C15", 9],
-    "diligenceallowance": ["B16", "C16", 10],
-    "welfare": ["B17", "C17", 15],
-    "target": ["B18", "C18", 19],
-    "bonus": ["B19", "C19", 20],
-    "totale": ["B21", "C21", "=SUM(C11:C19)"],
-    "net": ["B23", "C23", 21],
-    "totled": ["F21", "G21", "=SUM(G11:G16)"],
-    "loan": ["F17", "G17", 14],
-    "debt": ["F16", "G16", 16],
-    "leave": ["F15", "G15", 18],
-    "late": ["F14", "G14", 17],
-    "repayment": ["F13", "G13", 13],
-    "social": ["F12", "G12", 12],
-    "advance": ["F11", "G11", 11],
-    "absent": ["K11", "L11", 23],
-    "late_detail": ["K12", "L12", 24],
-    "sick": ["K13", "L13", 25],
-    "personal": ["K14", "L14", 26],
-    "vacation": ["K15", "L15", 27],
-    "otd_detail": ["K16", "L16", 28],
-    "oth_detail": ["K17", "L17", 29],
-    "otho_detail": ["K18", "L18", 30]
+    "template_pdf": "slip_portrait_pdf.html",
+    "template_email": "slip_portrait_email.html",
+    "company": {
+      "name": "Haris premium buffet",
+      "address": "บริษัท ไอแอมฟู้ด จำกัด\n63/34 ถนนเลี่ยงเมืองปากเกร็ด ตำบลบางตลาด อ.ปากเกร็ด เทศบาลนครนนทบุรี จ.นนทบุรี 11120",
+      "ID": "0125562015764"
+    },
+    "earnings": {
+      "label_key": "earnings",
+      "fields": [
+        {
+          "key": "อัตราเงินเดือน",
+          "label_key": "salary",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "ค่าตำแหน่ง",
+          "label_key": "positionallowance",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "โอที/วัน",
+          "label_key": "otd",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "โอที/ชม.",
+          "label_key": "oth",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "โอที/ชม. X 3",
+          "label_key": "otho",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "เบี้ยขยัน",
+          "label_key": "diligenceallowance",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "สวัสดิการอื่นๆ",
+          "label_key": "welfare",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "ยอดเป้า",
+          "label_key": "target",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "โบนัส",
+          "label_key": "bonus",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        }
+      ]
+    },
+    "deduction": {
+      "label_key": "deduction",
+      "fields": [
+        {
+          "key": "เบิก",
+          "label_key": "advance",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "ปกส.",
+          "label_key": "social",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "ยอดจ่ายเงินกู้",
+          "label_key": "repayment",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "สาย",
+          "label_key": "late",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "ลา",
+          "label_key": "leave",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        },
+        {
+          "key": "หนี้",
+          "label_key": "debt",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        }
+      ]
+    },
+    "details": {
+      "label_key": "details",
+      "fields": [
+        {
+          "key": "ขาด (วัน)",
+          "label_key": "absent",
+          "display": true,
+          "format_key": "int",
+          "unit_key": "day"
+        },
+        {
+          "key": "สาย (นาที)",
+          "label_key": "สาย",
+          "display": true,
+          "format_key": "int",
+          "unit_key": "minute"
+        },
+        {
+          "key": "ลาป่วย (วัน)",
+          "label_key": "sick",
+          "display": true,
+          "format_key": "int",
+          "unit_key": "day"
+        },
+        {
+          "key": "ลากิจ (วัน)",
+          "label_key": "personal",
+          "display": true,
+          "format_key": "int",
+          "unit_key": "day"
+        },
+        {
+          "key": "ลาพักร้อน (วัน)",
+          "label_key": "vacation",
+          "display": true,
+          "format_key": "int",
+          "unit_key": "day"
+        },
+        {
+          "key": "OT (วัน)",
+          "label_key": "otd_detail",
+          "display": true,
+          "format_key": "int",
+          "unit_key": "day"
+        },
+        {
+          "key": "ค่าล่วงเวลา (ชั่วโมง)",
+          "label_key": "oth_detail",
+          "display": true,
+          "format_key": "int",
+          "unit_key": "hour"
+        },
+        {
+          "key": "ค่าล่วงเวลา (ชั่วโมง) คูณ 3",
+          "label_key": "otho_detail",
+          "display": true,
+          "format_key": "int",
+          "unit_key": "hour"
+        },
+        {
+          "key": "เงินกู้ค้าง",
+          "label_key": "loan",
+          "display": true,
+          "format_key": "float",
+          "unit_key": "฿"
+        }
+      ]
+    },
+    "total": {
+      "key": "รายได้สุทธิ",
+      "label_key": "net",
+      "format_key": "float",
+      "unit_key": "฿"
+    }
   },
   "tukkae_slip_details": {
     "email_col": 20,

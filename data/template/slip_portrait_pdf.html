@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Salary Slip</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Noto+Sans+Thai:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Kanit", sans-serif;
+        background: #f8fafc;
+        padding: 10px;
+        color: #1e293b;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 6px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+      }
+
+      /* Header converted from flex to table */
+      .header {
+        background: #1e293b;
+        color: white;
+        padding: 15px 20px;
+        border-bottom: 3px solid #3b82f6;
+      }
+
+      .header-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .header-table td {
+        padding: 0;
+        border: none;
+        vertical-align: middle;
+      }
+
+      .header-table .company-info {
+        width: 70%;
+        text-align: left;
+      }
+
+      .header-table .slip-info {
+        width: 30%;
+        text-align: right;
+      }
+
+      .company-info h1 {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+
+      .company-info p {
+        font-size: 12px;
+        opacity: 0.9;
+        margin-bottom: 3px;
+      }
+
+      .slip-title {
+        font-size: 20px;
+        font-weight: 600;
+        text-align: right;
+      }
+
+      .content {
+        padding: 15px 20px;
+      }
+
+      .section {
+        margin-bottom: 15px;
+        page-break-inside: avoid;
+      }
+
+      .section-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 5px;
+      }
+
+      /* Convert info-grid to table layout */
+      .info-table {
+        width: 100%;
+        background: #f8fafc;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 15px;
+        border-collapse: separate;
+        border-spacing: 10px;
+        overflow: hidden;
+      }
+
+      .info-table td {
+        width: fit-content;
+        vertical-align: top;
+        padding: 0;
+        border: none;
+        border-radius: 6px;
+      }
+
+      .info-item {
+        display: table;
+        width: 100%;
+      }
+
+      .info-item > div {
+        display: table-row;
+      }
+
+      .info-label {
+        font-size: 10px;
+        font-weight: 500;
+        color: #64748b;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+        display: table-cell;
+      }
+
+      .info-value {
+        font-size: 14px;
+        font-weight: 600;
+        display: table-cell;
+      }
+
+      /* Convert horizontal layout for tables to table */
+      .tables-container {
+        width: 100%;
+        margin-bottom: 15px;
+      }
+
+      .tables-main-table {
+        width: 100%;
+        border-collapse: separate;
+      }
+
+      .tables-main-table td {
+        width: 50%;
+        vertical-align: top;
+        padding: 0;
+        border: none;
+      }
+
+      /* Convert table-section from flex to table */
+      .table-section {
+        display: table;
+        width: 100%;
+        height: 100%;
+      }
+
+      .table-section .section-title {
+        display: table-header-group;
+      }
+
+      .table-container {
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        overflow: hidden;
+        background: white;
+        height: 100%;
+        display: block;
+      }
+
+      .table-container table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+        height: 100%;
+      }
+
+      .table-container th {
+        background: #64748b;
+        color: white;
+        padding: 8px 12px;
+        text-align: left;
+        font-size: 10px;
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+
+      .table-container td {
+        font-size: 12px;
+        padding: 6px 12px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+      }
+
+      .table-container tr:nth-child(even) {
+        background-color: #f8fafc;
+      }
+
+      .totals {
+        background: #334155 !important;
+        color: white;
+        font-weight: 600;
+      }
+
+      .totals td {
+        border: none;
+        font-size: 12px;
+        padding: 10px 12px;
+      }
+
+      /* Details section converted to table */
+      .details-section {
+        margin-top: 10px;
+      }
+
+      .details-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 10px;
+      }
+
+      .details-table td {
+        width: 33.333%;
+        padding: 0;
+        vertical-align: top;
+        border: none;
+        border-radius: 6px;
+      }
+
+      .details-item {
+        background: #f8fafc;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        text-align: center;
+        height: 100%;
+        display: block;
+        width: 100%;
+      }
+
+      .details-item .label {
+        font-size: 12px;
+        color: #64748b;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+        font-weight: 500;
+        display: block;
+      }
+
+      .details-item .value {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1e293b;
+        display: block;
+      }
+
+      .net-pay {
+        background: #1e293b;
+        color: white;
+        border-radius: 6px;
+        padding: 15px;
+        text-align: center;
+        border-left: 4px solid #3b82f6;
+        margin: 15px 0;
+        display: block;
+        width: 100%;
+      }
+
+      .net-pay .label {
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        display: block;
+      }
+
+      .net-pay .amount {
+        font-size: 22px;
+        font-weight: 700;
+        display: block;
+      }
+
+      .footer {
+        background: #f8fafc;
+        padding: 12px 20px;
+        text-align: center;
+        font-size: 14px;
+        color: #64748b;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      .note {
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-left: 4px solid #64748b;
+        border-radius: 6px;
+        padding: 12px;
+        margin-top: 15px;
+        font-size: 12px;
+        color: #475569;
+      }
+
+      @media print {
+        @page {
+          size: A4 portrait;
+          margin: 0.5cm;
+        }
+
+        
+
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+
+        html,
+        body {
+          font-family: "Kanit", sans-serif;
+          width: 210mm;
+          height: 297mm;
+        }
+
+        body {
+          background: white;
+          padding: 0;
+          margin: 0;
+          font-size: 12px;
+        }
+
+        .container {
+          box-shadow: none;
+          max-width: 100%;
+          border: none;
+          margin: 0;
+        }
+
+        .header {
+          background: #1e293b !important;
+          -webkit-print-color-adjust: exact;
+          color: white !important;
+          padding: 10px 15px;
+        }
+
+        .content {
+          padding: 10px 15px;
+        }
+
+        .tables-main-table {
+          width: 100%;
+          border-collapse: separate;
+        }
+
+        .totals {
+          background: #334155 !important;
+          color: white !important;
+          -webkit-print-color-adjust: exact;
+        }
+
+        .net-pay {
+          background: #1e293b !important;
+          color: white !important;
+          -webkit-print-color-adjust: exact;
+        }
+
+        .footer {
+          font-size: 14px;
+          padding: 8px 15px;
+        }
+
+        .section,
+        .table-container,
+        .net-pay {
+          page-break-inside: avoid;
+        }
+
+        /* Ensure tables maintain equal height in print */
+        .table-container {
+          height: auto;
+          min-height: 200px;
+        }
+      }
+
+      @media screen and (max-width: 768px) {
+        .header-table td {
+          display: block;
+          width: 100%;
+          text-align: left !important;
+          margin-bottom: 10px;
+        }
+
+        .header-table .slip-info {
+          text-align: left !important;
+        }
+
+        .tables-main-table {
+          border-spacing: 0;
+        }
+
+        .tables-main-table td {
+          display: block;
+          width: 100%;
+          margin-bottom: 15px;
+        }
+
+        .info-table td {
+          display: block;
+          width: 100%;
+          margin-bottom: 10px;
+        }
+
+        .info-table {
+          border-spacing: 0;
+          padding: 10px;
+        }
+
+        .details-table td {
+          display: block;
+          width: 100%;
+          margin-bottom: 10px;
+        }
+
+        .details-table {
+          border-spacing: 0;
+        }
+      }
+    </style>
+    
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <table class="header-table">
+          <tr>
+            <td class="company-info">
+              <h1>{{ context.company.name }}</h1>
+              <p>{{ context.company.address }}</p>
+              <p><strong>{{ t('tax_id') }}</strong> {{ context.company.ID }}</p>
+            </td>
+            <td class="slip-info">
+              <p class="slip-title">{{ t('payslip') }}</p>
+              <div>{{ context.payPeriod }}</div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="content">
+        <div class="section">
+          <div class="section-title">{{ t('employee_infomation') }}</div>
+          <table class="info-table">
+            <tr>
+              <td>
+                <div class="info-item">
+                  <div>
+                    <div class="info-label">{{ t('employee_id') }}</div>
+                  </div>
+                  <div>
+                    <div class="info-value">{{ context.employee.id }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="info-item">
+                  <div>
+                    <div class="info-label">{{ t('employee_name') }}</div>
+                  </div>
+                  <div>
+                    <div class="info-value">{{ context.employee.name }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="info-item">
+                  <div>
+                    <div class="info-label">{{ t('employee_position') }}</div>
+                  </div>
+                  <div>
+                    <div class="info-value">{{ context.employee.position }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="info-item">
+                  <div>
+                    <div class="info-label">{{ t('employee_branch') }}</div>
+                  </div>
+                  <div>
+                    <div class="info-value">{{ context.employee.branch }}</div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Horizontal Tables Layout converted to table -->
+        <div class="tables-container">
+          <table class="tables-main-table">
+            <tr>
+              <td>
+                <!-- Earnings Table -->
+                {% set earning_len = context.sections.earnings | length %} 
+                {% set deduction_len = context.sections.deduction | length %} 
+                {% set diff = deduction_len - earning_len %}
+                <div class="table-section">
+                  <div class="section-title">{{ t('earnings') }}</div>
+                  <div class="table-container">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>{{ t('description') }}</th>
+                          <th style="text-align: right">{{ t('amount') }}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for item in context.sections.earnings %}
+                        <tr>
+                          <td>{{ item.label }}</td>
+                          <td style="text-align: right">
+                            {{ item.formatted }} {{ item.unit }}
+                          </td>
+                        </tr>
+                        {% endfor %} 
+                        {% if diff > 0 %} 
+                        {% for i in range(diff) %}
+                        <tr>
+                          <td>&nbsp;</td>
+                          <td>&nbsp;</td>
+                        </tr>
+                        {% endfor %} 
+                        {% endif %}
+
+                        <tr class="totals">
+                          <td>{{ context.totals.earnings.label }}</td>
+                          <td style="text-align: right">
+                            {{ context.totals.earnings.formatted }} {{
+                            context.totals.earnings.unit }}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <!-- Deductions Table -->
+                {% set diff = earning_len - deduction_len %}
+                <div class="table-section">
+                  <div class="section-title">{{ t('deduction') }}</div>
+                  <div class="table-container">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>{{ t('description') }}</th>
+                          <th style="text-align: right">{{ t('amount') }}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for item in context.sections.deduction %}
+                        <tr>
+                          <td>{{ item.label }}</td>
+                          <td style="text-align: right">
+                            {{ item.formatted }} {{ item.unit }}
+                          </td>
+                        </tr>
+                        {% endfor %} 
+                        {% if diff > 0 %} 
+                        {% for i in range(diff) %}
+                        <tr>
+                          <td>&nbsp;</td>
+                          <td>&nbsp;</td>
+                        </tr>
+                        {% endfor %} 
+                        {% endif %}
+                        <tr class="totals">
+                          <td>{{ context.totals.deduction.label }}</td>
+                          <td style="text-align: right">
+                            {{ context.totals.deduction.formatted }} {{
+                            context.totals.deduction.unit }}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Additional Details Section converted to table -->
+        <div class="section details-section">
+          <div class="section-title">{{ t('details') }}</div>
+          <table class="details-table">
+            <tr>
+              {% for item in context.sections.details %}
+              <td>
+                <div class="details-item">
+                  <div class="label">{{ item.label }}</div>
+                  <div class="value">{{ item.formatted }} {{ item.unit }}</div>
+                </div>
+              </td>
+              {% if loop.index % 3 == 0 and not loop.last %}
+            </tr>
+            <tr>
+              {% endif %}
+              {% endfor %}
+            </tr>
+          </table>
+        </div>
+
+        <div class="section">
+          <div class="net-pay">
+            <div class="label">{{ context.sections.net.label }}</div>
+            <div class="amount">
+              {{ context.sections.net.formatted }} {{ context.sections.net.unit
+              }}
+            </div>
+          </div>
+        </div>
+
+        <div class="note">
+          <strong>Note:</strong> This is a system-generated document. No
+          signature is required.
+        </div>
+      </div>
+
+      <div class="footer">
+        <p><strong>{{ t('generatedon') }} {{ context.timeStamp }}</strong></p>
+        <p>{{ t('contactHR') }}</p>
+      </div>
+    </div>
+  </body>
+</html>

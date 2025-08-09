@@ -13,8 +13,7 @@ import time
 import threading
 from datetime import datetime
 from setup_config import EMAIL_ATTEMP ,SENDER ,PASSWORD, FROM_EMAIL
-from premailer import transform
-
+import json
 
 month = {
         "January":"มกราคม", 
@@ -91,11 +90,11 @@ class send_email():
         # msg.attach(MIMEText(body)) bug
         # msg.attach(MIMEText('<img src="cid:image1" width="1000" height="772">', 'html'))
         
-        with open(person['html_path'], "r", encoding="utf-8") as f:
+        with open(person['html_email_path'], "r", encoding="utf-8") as f:
             html_content = f.read()
 
         
-        msg.attach(MIMEText(transform(html_content),'html'))
+        msg.attach(MIMEText(html_content,'html'))
 
         with open(person["pdf_path"],'rb') as f:   
             attach = MIMEApplication(f.read(),_subtype="pdf")
@@ -128,14 +127,10 @@ class send_email():
                     return
                 smtp.quit()
                 print(f'Mail has send to {person["employee_name"]} | {person["email"]} {self.index}/{length}')
-
-                path_name:str = os.path.split(person["pdf_path"])
-                checker = '1'
-                new_name = ','.join([person['employee_name'],person["email"],checker,person["pay_period"],person["created_at"]])+'.pdf'
-                new_path = os.path.join(path_name[0],new_name)
-                try:
-                    os.rename(person["pdf_path"],new_path)
-                except:pass
+            
+            person['mail_sent'] = True
+            with open(person["meta_data_path"],'w',encoding="utf-8") as f:
+                json.dump(person, f, ensure_ascii=False, indent=2)
 
     def send(self,people):
 
