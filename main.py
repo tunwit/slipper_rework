@@ -44,8 +44,6 @@ from system.pdf_gen import excel
 from system.pdf_gen import creating
 from pathlib import Path
 import uuid
-import pandas as pd
-
 """
 
 ------------------- shop_KEY -------------------

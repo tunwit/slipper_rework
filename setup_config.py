@@ -29,4 +29,5 @@ else:
 
 SHOP_KEY = config['shop_key']
 EMAIL_ATTEMP = config['email_attemps']
+PDF_GENERATOR_CONCURRENCY = config['pdf_generator_concurrency']
 SLIP_DETAIL = config[f'{SHOP_NAME}_slip_details']

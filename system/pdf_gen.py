@@ -4,12 +4,33 @@ from pathlib import Path
 from datetime import date
 from datetime import datetime
 import shutil
-from setup_config import SLIP_DETAIL, LOGO_PATH, SHOP_NAME
+from setup_config import SLIP_DETAIL, PDF_GENERATOR_CONCURRENCY, SHOP_NAME
 import pandas as pd
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 import asyncio
 from pyppeteer import launch
+import logging
+import sys
+import contextlib
+import time
+
+
+logging.getLogger('pyppeteer').setLevel(logging.WARNING)
+logging.getLogger('websockets').setLevel(logging.ERROR)
+
+@contextlib.contextmanager
+def suppress_output():
+    with open(os.devnull, 'w') as devnull:
+        old_stdout = sys.stdout
+        old_stderr = sys.stderr
+        sys.stdout = devnull
+        sys.stderr = devnull
+        try:
+            yield
+        finally:
+            sys.stdout = old_stdout
+            sys.stderr = old_stderr
 
 creating = False
 
@@ -41,7 +62,7 @@ class excel():
         self.jobs = []
         self.progress_percent = 0
         self.pages = []
-        self.concurrent_count = 5
+        self.concurrent_count = PDF_GENERATOR_CONCURRENCY * 2
         self.semaphore = asyncio.Semaphore(self.concurrent_count)
     
     def ex_to_df(self):
@@ -129,11 +150,20 @@ class excel():
         else:
             return f"{value}"
     
-    async def render_to_pdf(self, html_pdf, pdf_path, path_storage, context):
+    def render_to_html(self,context,t,template,path_storage,filename) -> str:
+        html = template.render(context=context,t=t)
+
+        final_path = path_storage / filename
+        with open(final_path.with_suffix(".html"),'w', encoding='utf-8') as f:
+            f.write(html)
+
+        return html
+
+    async def render_to_pdf(self, html_content, pdf_path, path_storage, context):
         async with self.semaphore:
             page = self.pages.pop()
             try:
-                await page.setContent(html_pdf)
+                await page.setContent(html_content)
                 await page.pdf({
                     'path': pdf_path,
                     'format': 'A4',
@@ -147,7 +177,11 @@ class excel():
             
         #create pay slip pdf
         file_name = path_storage / "pay_slip_pdf"
+        start_time = time.perf_counter()
         self.createMetaData(path_storage,context)
+        end_time = time.perf_counter()
+        metadata_io_time = end_time - start_time
+        print(f"Metadata creation took {metadata_io_time:.17f} seconds")
         key = f'{context['employee']["id"]}_{context['employee']['name']}'.strip()
         path_slip = self.slip_dir / context['employee']['branch'] / key
         shutil.copy2(file_name.with_suffix(".pdf"), path_slip.with_suffix(".pdf"))
@@ -163,28 +197,55 @@ class excel():
                 exe = Path("C:\Program Files\Google\Chrome\Application\chrome.exe")
             else:
                 exe = Path(r"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
-            browser = await launch(headless=True,
-                        executablePath=exe,handleSIGINT=False,
-                        handleSIGTERM=False,
-                        handleSIGHUP=False,
-                        dumpio=False, 
-                        args=['--no-sandbox',
-                        '--disable-setuid-sandbox',
-                        '--disable-dev-shm-usage',
-                        '--disable-extensions',
-                        '--disable-background-networking',
-                        '--disable-sync',
-                        '--disable-translate',
-                        '--hide-scrollbars',
-                        '--metrics-recording-only',
-                        '--mute-audio',
-                        '--no-first-run',
-                        '--safebrowsing-disable-auto-update',])
+            with suppress_output():
+                browser = await launch(headless=True,
+                            executablePath=exe,handleSIGINT=False,
+                            handleSIGTERM=False,
+                            handleSIGHUP=False,
+                            dumpio=False, 
+                            args=['--no-sandbox',
+                            '--disable-setuid-sandbox',
+                            '--disable-dev-shm-usage',
+                            '--disable-extensions',
+                            '--disable-background-networking',
+                            '--disable-sync',
+                            '--disable-translate',
+                            '--hide-scrollbars',
+                            '--metrics-recording-only',
+                            '--mute-audio',
+                            '--no-first-run',
+                            '--safebrowsing-disable-auto-update',
+                            '--disable-background-timer-throttling',
+                            '--disable-renderer-backgrounding',
+                            '--disable-backgrounding-occluded-windows',
+                            '--memory-pressure-off'])
+                
+            env = Environment(loader=FileSystemLoader('data/template'))
+            template_pdf = env.get_template(SLIP_DETAIL['template_pdf'])
+            template_email = env.get_template(SLIP_DETAIL['template_email'])
+            lang_th = self.get_lang('th')
+            lang_en = self.get_lang('en')
+            
             tasks = []
             await self.init_pages(browser, count=self.concurrent_count)
-            for html_pdf, pdf_path, path_storage, context in self.jobs:
-                task = self.render_to_pdf(html_pdf, pdf_path, path_storage, context)
+
+            for path_storage, context in self.jobs:
+                if context['employee']['locale'] == 'th':
+                    lang = lang_th
+                else:
+                    lang = lang_en
+
+                def t(key):
+                    return lang.get(key, key)
+                
+                self.render_to_html(context, t, template_email, path_storage, "pay_slip_email")
+                html_content_pdf = self.render_to_html(context, t, template_pdf, path_storage, "pay_slip_pdf")
+                self.progress(current=context["employee"]["name"],branch=context["employee"]["branch"],file='html')
+
+                pdf_path = path_storage / "pay_slip_pdf.pdf"
+                task = self.render_to_pdf(html_content_pdf, pdf_path, path_storage, context)
                 tasks.append(task)
+
             await asyncio.gather(*tasks)
 
             for page in self.pages:
@@ -206,6 +267,7 @@ class excel():
             "html_email_path": str((storage_path / "pay_slip_email").with_suffix(".html")),
             "meta_data_path":str(json_file),
             "mail_sent": False,
+            "locale": context['locale'],
             "created_at": context['timeStamp']
         }
         
@@ -251,11 +313,10 @@ class excel():
             "formatted": self.format_value(sum(item["value"] for item in deduction),"float")
         }
 
-        print(SLIP_DETAIL['company']['branch'])
         context = {
         "company":{
-            "name":SLIP_DETAIL['company']['name'],
-            "branch":SLIP_DETAIL['company']['branch'][employee['branch']]
+            "name":SLIP_DETAIL["company"]["name"],
+            "branch":SLIP_DETAIL["company"]["branch"][employee["branch"]]
         },
         "employee": employee,
         "sections": {
@@ -269,6 +330,7 @@ class excel():
             "deduction": total_deduction,
         },
         "payPeriod":date_m.strftime("%B %Y"),
+        "locale":employee_data['ภาษา'],
         "timeStamp":datetime.now().strftime("%d %B %Y %H:%M:%S")
         }
         return context
@@ -279,11 +341,6 @@ class excel():
 
         self.re_init()
         self.total_rows = sum(len(df) for df in data.values())
-        env = Environment(loader=FileSystemLoader('data/template'))
-        
-
-        template_pdf = env.get_template(SLIP_DETAIL['template_pdf'])
-        template_email = env.get_template(SLIP_DETAIL['template_email'])
 
         #pre load langauge
         lang_th = self.get_lang('th')
@@ -308,92 +365,23 @@ class excel():
                     "id": employee_data["รหัสพนักงาน"],
                     "position": employee_data["ตำแหน่ง"],
                     "email":employee_data['Email'],
+                    "locale": employee_data['ภาษา'],
                     "branch":branch
                 }
                 
                 context = self.build_section(employee,employee_data,date_m,t)
-               
-                html_pdf = template_pdf.render(context=context,t=t)
-                html_email = template_email.render(context=context,t=t)
 
-                key = f'{employee["id"]}_{employee['name']}'.strip()
-                path_strorage = self.storage_dir / branch / key 
+                key = f'{employee["id"]}_{employee["name"]}'.strip()
+                path_storage = self.storage_dir / branch / key
 
                 #create pay slip html
-                os.makedirs(path_strorage, exist_ok=True)
-
-                file_name = path_strorage / "pay_slip_email"
-                with open(file_name.with_suffix(".html"),'w', encoding='utf-8') as f:
-                    f.write(html_email)
-
-                file_name = path_strorage / "pay_slip_pdf"
-                with open(file_name.with_suffix(".html"),'w', encoding='utf-8') as f:
-                    f.write(html_pdf)
+                if not os.path.exists(path_storage):
+                    os.makedirs(path_storage, exist_ok=True)
                 
-                self.jobs.append((html_pdf, file_name.with_suffix(".pdf"),path_strorage,context))
-                self.progress(current=employee["name"],branch=branch)
+                self.jobs.append((path_storage,context))
 
         asyncio.run(self.html_to_pdf_batch())
         self.complete = True
         self.progress()
         creating = False
         self.progress_percent = 0
-
-        # for df in self.dfs:
-        #     for i in self.temporary.sheetnames:
-        #         if i != "สลิป":
-        #             self.temporary.remove(self.temporary[i])
-        #     for i in range(self.get_round(sheet)):
-        #             sheet_title = sheet.title.replace('D','')
-        #             i += 3
-        #             if not self.get_value(sheet,2,i) in people:
-        #                 continue
-        #             index += 1
-        #             self.mkdir(sheet_title)
-        #             self.progress(index,self.get_value(sheet,2,i),sheet_title)
-        #             respound = self.get_lang(self.get_value(sheet,27,i))
-        #             img = openpyxl.drawing.image.Image(LOGO_PATH)
-        #             img.anchor = 'B1'
-        #             ws = [i.title for i in self.salib]
-        #             salib = self.temporary[ws[0]]
-        #             salib.add_image(img)
-                    
-        #             salib["C1"] = respound["address"][sheet_title]["adline1"]
-        #             salib["C2"] = respound["address"][sheet_title]["adline2"]
-        #             salib["C3"] = respound["address"][sheet_title]["adline3"]
-        #             salib["C4"] = sheet_title #สาขา
-        #             salib["B8"] = f"{respound['ofmonth'].format(month=month[date_m.strftime('%B')],year=date_m.year)}"
-        #             # "Key":[text_pos,value_pos,col_pos]
-
-        #             email = self.get_value(sheet,SLIP_DETAIL['email_col'],i)
-        #             for field in SLIP_DETAIL.items():
-        #                 if field[0] == "email_col":
-        #                     continue
-        #                 key,text_pos ,value_pos ,col_pos = field[0],field[1][0],field[1][1],field[1][2]
-        #                 salib[text_pos] = respound[key]
-        #                 if value_pos:
-        #                     if type(col_pos) == int:
-        #                         salib[value_pos] = self.get_value(sheet,col_pos,i)
-        #                     else:
-        #                         salib[value_pos] = col_pos
-                    
-        #             filename = f"{self.get_value(sheet,2,i)},{email},0,{date_m.strftime('%B')},{datetime.now().strftime('%d%m%y%H%M%S')}"
-        #             print(filename)
-        #             finalpath_ex = os.path.join(self.output_dir,sheet_title,f"{filename}.xlsx")
-        #             self.temporary.save(finalpath_ex)
-        #             # wb = app.Workbooks.Open(finalpath_ex)
-        #             # wb.ActiveSheet.PageSetup.Orientation = 2
-        #             # wb.ActiveSheet.PageSetup.Zoom = False
-        #             # wb.ActiveSheet.PageSetup.FitToPagesTall = 1
-        #             # wb.ActiveSheet.PageSetup.FitToPagesWide = 1
-        #             # wb.ActiveSheet.ExportAsFixedFormat(0,os.path.join(self.output_dir,sheet_title,f"{filename}"))
-        #             # wb.Save()
-        #             # wb.Close()   
-        #             os.remove(finalpath_ex)
-        #     shutil.copyfile(self.path,self.temporaries)
-        #     self.temporary = load_workbook(self.temporaries,data_only=True)
-        #     time.sleep(0.1)
-        # os.remove(self.temporaries)
-        # self.complete = True
-        # self.progress()
-        # creating = False

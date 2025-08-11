@@ -1,6 +1,7 @@
 {
-  "shop_key": "TUKKAE",
+  "shop_key": "HARIS",
   "email_attemps": 5,
+  "pdf_generator_concurrency": 5,
   "haris_slip_details": {
     "template_pdf": "slip_portrait_pdf.html",
     "template_email": "slip_portrait_email.html",
