@@ -118,7 +118,7 @@ class send_email():
                         smtp.sendmail(SENDER,person['email'],msg.as_string())
                         success = True
                     except Exception as e:
-                        print(f"Fail to send mail to {person['name']} | {person['email']} trying {attemp}/{EMAIL_ATTEMP} due to {e}")
+                        print(f"Fail to send mail to {person['employee_name']} | {person['email']} trying {attemp}/{EMAIL_ATTEMP} due to {e}")
                         time.sleep(0.4)
 
                 self.progress(self.index,person['employee_name'],person['branch'])
