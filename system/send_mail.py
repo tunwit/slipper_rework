@@ -104,7 +104,7 @@ class send_email():
 
     def send_emails(self,person,length):
             self.index += 1
-            if person['email'] == "-":
+            if person['email'] == "-" or person['email'] == 0:
                 return
             context = ssl.create_default_context()
             with smtplib.SMTP_SSL('smtp.gmail.com',465,context = context) as smtp:

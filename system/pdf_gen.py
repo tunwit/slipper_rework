@@ -74,9 +74,9 @@ class excel():
         for b in to_pop:
             dfs.pop(b)
         
-
         cleaned_dfs = {}
         for sheet_name, df in dfs.items():
+            print(df.columns)
             df.columns.values[0] = "รหัสพนักงาน"
             if "รหัสพนักงาน" in df.columns and "ชื่อ-นามสกุล" in df.columns:
                 new_name = sheet_name.replace("D", "", 1)  # remove only the first "D"
@@ -85,6 +85,8 @@ class excel():
                 cleaned_dfs[new_name][first_col] = cleaned_dfs[new_name][first_col].astype(pd.Int64Dtype()).astype(str)
                 cleaned_dfs[new_name].fillna(0, inplace=True)
         
+       
+
         return cleaned_dfs
     
     def get_storage_dir(self):
