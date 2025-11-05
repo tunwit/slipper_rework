@@ -649,7 +649,7 @@ class GmailSender(MDScreen):
                     email = data.get('email')
                     payPeriod = data.get('pay_period')
                     create = data.get('created_at')
-                    createdAt = datetime.strptime(create,'%d %B %Y %H:%M:%S')
+                    createdAt = datetime.fromisoformat(create)
                     mailSent = data.get('mail_sent')
 
                     item = CustomOneLineAvatarIconListItem(
@@ -867,7 +867,7 @@ class Employee(MDScreen):
                         email = data.get('email')
                         payPeriod = data.get('pay_period')
                         create = data.get('created_at')
-                        createdAt = datetime.strptime(create,'%d %B %Y %H:%M:%S')
+                        createdAt = datetime.fromisoformat(create)
                         mailSent = data.get('mail_sent')
 
                         item = CustomOneLineAvatarIconListItem(

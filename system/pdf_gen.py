@@ -14,6 +14,7 @@ import logging
 import sys
 import contextlib
 import time
+from babel.dates import format_date,format_datetime
 
 
 logging.getLogger('pyppeteer').setLevel(logging.WARNING)
@@ -263,14 +264,14 @@ class excel():
             "employee_name": context['employee']['name'],
             "email": context['employee']['email'],
             "branch":context['employee']['branch'],
-            "pay_period": context['payPeriod'],
+            "pay_period": context['payPeriodISO'],
             "pdf_path": str((storage_path / "pay_slip_pdf").with_suffix(".pdf")),
             "html_path": str((storage_path / "pay_slip_pdf").with_suffix(".html")),
             "html_email_path": str((storage_path / "pay_slip_email").with_suffix(".html")),
             "meta_data_path":str(json_file),
             "mail_sent": False,
             "locale": context['locale'],
-            "created_at": context['timeStamp']
+            "created_at": context['timeStampISO']
         }
         
         with open(json_file,'w',encoding="utf-8") as f:
@@ -316,24 +317,26 @@ class excel():
         }
 
         context = {
-        "company":{
-            "name":SLIP_DETAIL["company"]["name"],
-            "branch":SLIP_DETAIL["company"]["branch"][employee["branch"]]
-        },
-        "employee": employee,
-        "sections": {
-            "earnings": earnings,
-            "deduction": deduction,
-            "details":details,
-            "net":net
-        },
-        "totals": {
-                "earnings": total_earnings,
-            "deduction": total_deduction,
-        },
-        "payPeriod":date_m.strftime("%B %Y"),
-        "locale":employee_data['ภาษา'],
-        "timeStamp":datetime.now().strftime("%d %B %Y %H:%M:%S")
+            "company":{
+                "name":SLIP_DETAIL["company"]["name"],
+                "branch":SLIP_DETAIL["company"]["branch"][employee["branch"]]
+            },
+            "employee": employee,
+            "sections": {
+                "earnings": earnings,
+                "deduction": deduction,
+                "details":details,
+                "net":net
+            },
+            "totals": {
+                    "earnings": total_earnings,
+                "deduction": total_deduction,
+            },
+            "payPeriod":format_date(date_m,"LLLL yyyy",employee_data['ภาษา']),
+            "payPeriodISO":date_m.isoformat(),
+            "locale":employee_data['ภาษา'],
+            "timeStamp":format_datetime(datetime.now(),"d MMMM yyyy HH:mm:ss",locale=employee_data['ภาษา']),
+            "timeStampISO":datetime.now().isoformat()
         }
         return context
     

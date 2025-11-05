@@ -71,7 +71,7 @@ class send_email():
             File_name:{person['file_name']}
             Ofmonth:{person['ofmonth']}
             Createat_raw:{person['createat']}
-            Createat_converted:{datetime.strptime(person['createat'],'%d%m%y%H%M%S')}
+            Createat_converted:{datetime.fromisoformat(person['createat'])}
             """
         msg.attach(MIMEText(body,'plain'))
         return msg
