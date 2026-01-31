@@ -79,8 +79,8 @@ class excel():
         for sheet_name, df in dfs.items():
             df.columns.values[0] = "รหัสพนักงาน"
             if "รหัสพนักงาน" in df.columns and "ชื่อ-นามสกุล" in df.columns:
-                new_name = sheet_name.replace("D", "", 1)  # remove only the first "D"
-                cleaned_dfs[new_name] = df.dropna(subset=["รหัสพนักงาน", "ชื่อ-นามสกุล"])
+                new_name = sheet_name.replace("D", "", 1).replace(" ","")  # remove only the first "D" and remove space
+                cleaned_dfs[new_name] = df.dropna(subset=["รหัสพนักงาน", "ชื่อ-นามสกุล"], how="any")
                 first_col = cleaned_dfs[new_name].columns[0]
                 cleaned_dfs[new_name][first_col] = cleaned_dfs[new_name][first_col].astype(pd.Int64Dtype()).astype(str)
                 cleaned_dfs[new_name].fillna(0, inplace=True)
@@ -360,9 +360,14 @@ class excel():
                 def t(key):
                     return lang.get(key, key)
                 
+                empId = ""
+                if employee_data['รหัสพนักงาน'] == "<NA>":
+                    empId = "NA"
+                else:
+                    empId = employee_data['รหัสพนักงาน']
                 employee = {
                     "name" : employee_data["ชื่อ-นามสกุล"],
-                    "id": employee_data["รหัสพนักงาน"],
+                    "id": empId,
                     "position": employee_data["ตำแหน่ง"],
                     "email":employee_data['Email'],
                     "locale": employee_data['ภาษา'],
@@ -370,7 +375,6 @@ class excel():
                 }
                 
                 context = self.build_section(employee,employee_data,date_m,t)
-
                 key = f'{employee["id"]}_{employee["name"]}'.strip()
                 path_storage = self.storage_dir / branch / key
 

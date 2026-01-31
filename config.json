@@ -1,5 +1,5 @@
 {
-  "shop_key": "HARIS",
+  "shop_key": "TUKKAE",
   "email_attemps": 5,
   "pdf_generator_concurrency": 5,
   "haris_slip_details": {
@@ -25,6 +25,10 @@
           "tax_id": "0125562015764"
         },
         "ขับรถ": {
+          "address": "บริษัท ไอ แอม ฟู้ด จำกัด สำนักงานใหญ่ 63/34 ถนนเลี่ยงเมืองปากเกร็ด ตำบลบางตลาด อ.ปากเกร็ด เทศบาลนครนนทบุรี  จ.นนทบุรี 11120 ",
+          "tax_id": "0125562015764"
+        },
+        "อื่นๆ": {
           "address": "บริษัท ไอ แอม ฟู้ด จำกัด สำนักงานใหญ่ 63/34 ถนนเลี่ยงเมืองปากเกร็ด ตำบลบางตลาด อ.ปากเกร็ด เทศบาลนครนนทบุรี  จ.นนทบุรี 11120 ",
           "tax_id": "0125562015764"
         }
@@ -152,56 +156,56 @@
           "key": "ขาด (วัน)",
           "label_key": "absent",
           "display": true,
-          "format_key": "int",
+          "format_key": "float",
           "unit_key": "day"
         },
         {
           "key": "สาย (นาที)",
           "label_key": "สาย",
           "display": true,
-          "format_key": "int",
+          "format_key": "float",
           "unit_key": "minute"
         },
         {
           "key": "ลาป่วย (วัน)",
           "label_key": "sick",
           "display": true,
-          "format_key": "int",
+          "format_key": "float",
           "unit_key": "day"
         },
         {
           "key": "ลากิจ (วัน)",
           "label_key": "personal",
           "display": true,
-          "format_key": "int",
+          "format_key": "float",
           "unit_key": "day"
         },
         {
           "key": "ลาพักร้อน (วัน)",
           "label_key": "vacation",
           "display": true,
-          "format_key": "int",
+          "format_key": "float",
           "unit_key": "day"
         },
         {
           "key": "OT (วัน)",
           "label_key": "otd_detail",
           "display": true,
-          "format_key": "int",
+          "format_key": "float",
           "unit_key": "day"
         },
         {
           "key": "ค่าล่วงเวลา (ชั่วโมง)",
           "label_key": "oth_detail",
           "display": true,
-          "format_key": "int",
+          "format_key": "float",
           "unit_key": "hour"
         },
         {
           "key": "ค่าล่วงเวลา (ชั่วโมง) คูณ 3",
           "label_key": "otho_detail",
           "display": true,
-          "format_key": "int",
+          "format_key": "float",
           "unit_key": "hour"
         },
         {
@@ -243,6 +247,10 @@
           "tax_id": "0125562015764"
         },
         "Butcherราชพฤกษ์": {
+          "address": "บริษัท ไอแอมฟู้ด จำกัด 63/34 ซอย1 แขวง คันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
+          "tax_id": "0125562015764"
+        },
+        "Butcherรังสิต": {
           "address": "บริษัท ไอแอมฟู้ด จำกัด 63/34 ซอย1 แขวง คันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
           "tax_id": "0125562015764"
         }
@@ -357,42 +365,42 @@
           "key": "ขาด (วัน)",
           "label_key": "absent",
           "display": true,
-          "format_key": "int",
+          "format_key": "float",
           "unit_key": "day"
         },
         {
           "key": "สาย (นาที)",
           "label_key": "สาย",
           "display": true,
-          "format_key": "int",
+          "format_key": "float",
           "unit_key": "minute"
         },
         {
           "key": "ลาป่วย (วัน)",
           "label_key": "sick",
           "display": true,
-          "format_key": "int",
+          "format_key": "float",
           "unit_key": "day"
         },
         {
           "key": "ลากิจ (วัน)",
           "label_key": "personal",
           "display": true,
-          "format_key": "int",
+          "format_key": "float",
           "unit_key": "day"
         },
         {
           "key": "ลาพักร้อน (วัน)",
           "label_key": "vacation",
           "display": true,
-          "format_key": "int",
+          "format_key": "float",
           "unit_key": "day"
         },
         {
           "key": "โอที (ชั่วโมง)",
           "label_key": "oth_detail",
           "display": true,
-          "format_key": "int",
+          "format_key": "float",
           "unit_key": "day"
         },
         {

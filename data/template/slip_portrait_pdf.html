@@ -320,8 +320,6 @@
           margin: 0.5cm;
         }
 
-        
-
         * {
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
@@ -438,7 +436,6 @@
         }
       }
     </style>
-    
   </head>
   <body>
     <div class="container">
@@ -448,7 +445,10 @@
             <td class="company-info">
               <h1>{{ context.company.name }}</h1>
               <p>{{ context.company.branch.address }}</p>
-              <p><strong>{{ t('tax_id') }}</strong> {{ context.company.branch.tax_id }}</p>
+              <p>
+                <strong>{{ t('tax_id') }}</strong> {{
+                context.company.branch.tax_id }}
+              </p>
             </td>
             <td class="slip-info">
               <p class="slip-title">{{ t('payslip') }}</p>
@@ -489,7 +489,9 @@
                     <div class="info-label">{{ t('employee_position') }}</div>
                   </div>
                   <div>
-                    <div class="info-value">{{ context.employee.position }}</div>
+                    <div class="info-value">
+                      {{ context.employee.position }}
+                    </div>
                   </div>
                 </div>
               </td>
@@ -513,9 +515,9 @@
             <tr>
               <td>
                 <!-- Earnings Table -->
-                {% set earning_len = context.sections.earnings | length %} 
-                {% set deduction_len = context.sections.deduction | length %} 
-                {% set diff = deduction_len - earning_len %}
+                {% set earning_len = context.sections.earnings | length %} {%
+                set deduction_len = context.sections.deduction | length %} {%
+                set diff = deduction_len - earning_len %}
                 <div class="table-section">
                   <div class="section-title">{{ t('earnings') }}</div>
                   <div class="table-container">
@@ -534,15 +536,13 @@
                             {{ item.formatted }} {{ item.unit }}
                           </td>
                         </tr>
-                        {% endfor %} 
-                        {% if diff > 0 %} 
-                        {% for i in range(diff) %}
+                        {% endfor %} {% if diff > 0 %} {% for i in range(diff)
+                        %}
                         <tr>
                           <td>&nbsp;</td>
                           <td>&nbsp;</td>
                         </tr>
-                        {% endfor %} 
-                        {% endif %}
+                        {% endfor %} {% endif %}
 
                         <tr class="totals">
                           <td>{{ context.totals.earnings.label }}</td>
@@ -577,15 +577,13 @@
                             {{ item.formatted }} {{ item.unit }}
                           </td>
                         </tr>
-                        {% endfor %} 
-                        {% if diff > 0 %} 
-                        {% for i in range(diff) %}
+                        {% endfor %} {% if diff > 0 %} {% for i in range(diff)
+                        %}
                         <tr>
                           <td>&nbsp;</td>
                           <td>&nbsp;</td>
                         </tr>
-                        {% endfor %} 
-                        {% endif %}
+                        {% endfor %} {% endif %}
                         <tr class="totals">
                           <td>{{ context.totals.deduction.label }}</td>
                           <td style="text-align: right">
@@ -617,8 +615,7 @@
               {% if loop.index % 3 == 0 and not loop.last %}
             </tr>
             <tr>
-              {% endif %}
-              {% endfor %}
+              {% endif %} {% endfor %}
             </tr>
           </table>
         </div>
