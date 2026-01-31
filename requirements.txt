@@ -8,3 +8,4 @@ jinja2
 pyppeteer
 premailer
 weasyprint
+babel

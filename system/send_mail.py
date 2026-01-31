@@ -71,7 +71,7 @@ class send_email():
             File_name:{person['file_name']}
             Ofmonth:{person['ofmonth']}
             Createat_raw:{person['createat']}
-            Createat_converted:{datetime.strptime(person['createat'],'%d%m%y%H%M%S')}
+            Createat_converted:{datetime.fromisoformat(person['createat'])}
             """
         msg.attach(MIMEText(body,'plain'))
         return msg
@@ -104,7 +104,7 @@ class send_email():
 
     def send_emails(self,person,length):
             self.index += 1
-            if person['email'] == "-":
+            if person['email'] == "-" or person['email'] == 0:
                 return
             context = ssl.create_default_context()
             with smtplib.SMTP_SSL('smtp.gmail.com',465,context = context) as smtp:
@@ -118,7 +118,7 @@ class send_email():
                         smtp.sendmail(SENDER,person['email'],msg.as_string())
                         success = True
                     except Exception as e:
-                        print(f"Fail to send mail to {person['name']} | {person['email']} trying {attemp}/{EMAIL_ATTEMP} due to {e}")
+                        print(f"Fail to send mail to {person['employee_name']} | {person['email']} trying {attemp}/{EMAIL_ATTEMP} due to {e}")
                         time.sleep(0.4)
 
                 self.progress(self.index,person['employee_name'],person['branch'])

@@ -15,6 +15,11 @@
       "adline2": "63/34 ซอย1 แขวง คันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
       "adline3": "เลขที่ผู้เสียภาษี 0125562015764"
     },
+    "Butcherรังสิต":{
+      "adline1": "บริษัท ไอแอมฟู้ด จำกัด",
+      "adline2": "63/34 ซอย1 แขวง คันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
+      "adline3": "เลขที่ผู้เสียภาษี 0125562015764"
+    },
     "Butcherราชพฤกษ์": {
       "adline1": "บริษัท ไอแอมฟู้ด จำกัด",
       "adline2": "63/34 ซอย1 แขวง คันนายาว เขตคันนายาว กรุงเทพมหานคร 10230",
@@ -61,9 +66,9 @@
   "deduction": "Deduction",
   "salary": "Salary",
   "positionallowance": "Position Allowance",
-  "otd": "OT (Days)",
-  "oth": "OT (Hours)",
-  "otho": "OT (Holidays)",
+  "otd_detail": "OT (Days)",
+  "oth_detail": "OT (Hours)",
+  "otho_detail": "OT (Holidays)",
   "diligenceallowance": "Diligence Allowance",
   "welfare": "Welfare",
   "target": "Target balance",
@@ -92,12 +97,14 @@
   "totallate": "Leave/Late/Absent",
   "฿": "฿",
   "day": "day",
-  "minute": "นาที",
+  "minute": "minute",
   "hour": "hour",
   "generatedon": "Slip generated on",
   "contactHR": "For inquiries, please contact HR department",
   "pay_period": "Pay Period",
   "tax_id": "Tax Id",
   "download_below": "Download Your Payslip Below",
-  "company_address":"Company Address"
+  "company_address":"Company Address",
+  "note": "Note: ",
+  "note_details":"This is a system-generated document. No signature is required."
 }
