@@ -150,6 +150,8 @@ class excel():
             return f"{value:,.2f}"
         elif fmt == "int":
             return f"{int(value)}"
+        elif fmt == "auto":
+            return int(value) if float(value).is_integer() else round(value, 2)
         else:
             return f"{value}"
     

@@ -1,5 +1,5 @@
 {
-  "shop_key": "TUKKAE",
+  "shop_key": "HARIS",
   "email_attemps": 5,
   "pdf_generator_concurrency": 5,
   "haris_slip_details": {
@@ -156,56 +156,56 @@
           "key": "ขาด (วัน)",
           "label_key": "absent",
           "display": true,
-          "format_key": "float",
+          "format_key": "auto",
           "unit_key": "day"
         },
         {
           "key": "สาย (นาที)",
           "label_key": "late",
           "display": true,
-          "format_key": "float",
+          "format_key": "auto",
           "unit_key": "minute"
         },
         {
           "key": "ลาป่วย (วัน)",
           "label_key": "sick",
           "display": true,
-          "format_key": "float",
+          "format_key": "auto",
           "unit_key": "day"
         },
         {
           "key": "ลากิจ (วัน)",
           "label_key": "personal",
           "display": true,
-          "format_key": "float",
+          "format_key": "auto",
           "unit_key": "day"
         },
         {
           "key": "ลาพักร้อน (วัน)",
           "label_key": "vacation",
           "display": true,
-          "format_key": "float",
+          "format_key": "auto",
           "unit_key": "day"
         },
         {
           "key": "OT (วัน)",
           "label_key": "otd_detail",
           "display": true,
-          "format_key": "float",
+          "format_key": "auto",
           "unit_key": "day"
         },
         {
           "key": "ค่าล่วงเวลา (ชั่วโมง)",
           "label_key": "oth_detail",
           "display": true,
-          "format_key": "float",
+          "format_key": "auto",
           "unit_key": "hour"
         },
         {
           "key": "ค่าล่วงเวลา (ชั่วโมง) คูณ 3",
           "label_key": "otho_detail",
           "display": true,
-          "format_key": "float",
+          "format_key": "auto",
           "unit_key": "hour"
         },
         {
@@ -369,49 +369,49 @@
           "key": "ขาด (วัน)",
           "label_key": "absent",
           "display": true,
-          "format_key": "float",
+          "format_key": "auto",
           "unit_key": "day"
         },
         {
           "key": "สาย (นาที)",
           "label_key": "สาย",
           "display": true,
-          "format_key": "float",
+          "format_key": "auto",
           "unit_key": "minute"
         },
         {
           "key": "ลาป่วย (วัน)",
           "label_key": "sick",
           "display": true,
-          "format_key": "float",
+          "format_key": "auto",
           "unit_key": "day"
         },
         {
           "key": "ลากิจ (วัน)",
           "label_key": "personal",
           "display": true,
-          "format_key": "float",
+          "format_key": "auto",
           "unit_key": "day"
         },
         {
           "key": "ลาพักร้อน (วัน)",
           "label_key": "vacation",
           "display": true,
-          "format_key": "float",
+          "format_key": "auto",
           "unit_key": "day"
         },
         {
           "key": "โอที (ชั่วโมง)",
           "label_key": "oth_detail",
           "display": true,
-          "format_key": "float",
+          "format_key": "auto",
           "unit_key": "day"
         },
         {
           "key": "เงินกู้ค้าง",
           "label_key": "loan",
           "display": true,
-          "format_key": "float",
+          "format_key": "auto",
           "unit_key": "฿"
         }
       ]
