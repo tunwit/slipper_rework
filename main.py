@@ -617,7 +617,6 @@ class GmailSender(MDScreen):
         mdlst_employee = MDList()
         scroll.add_widget(mdlst_employee)
 
-        print(self.get_storage_dir())
         for branch in os.listdir(self.get_storage_dir()):
             branch_path = self.get_storage_dir() / branch
             if not branch_path.is_dir(): 
@@ -647,6 +646,8 @@ class GmailSender(MDScreen):
                     data = self.getMetaData(branch,filename)
                     name = data.get('employee_name')
                     email = data.get('email')
+                    if(email == ""):
+                        email = "N/A"
                     payPeriod = data.get('pay_period')
                     create = data.get('created_at')
                     createdAt = datetime.fromisoformat(create)

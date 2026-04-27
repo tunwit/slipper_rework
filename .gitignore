@@ -1,6 +1,8 @@
 *.env
 *.env.haris
 *.env.tukkae
+.env*
+.env.local
 slip/
 storage/
 todo.txt

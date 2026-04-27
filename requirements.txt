@@ -9,3 +9,4 @@ pyppeteer
 premailer
 weasyprint
 babel
+resend

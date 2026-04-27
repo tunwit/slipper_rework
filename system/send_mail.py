@@ -7,13 +7,14 @@ from email.mime.text import MIMEText
 import tempfile
 from email.mime.image import MIMEImage
 from email.mime.application import MIMEApplication
-import pypdfium2 as pdfium
+import resend
 from email.utils import formatdate
 import time
 import threading
 from datetime import datetime
-from setup_config import EMAIL_ATTEMP ,SENDER ,PASSWORD, FROM_EMAIL
+from setup_config import EMAIL_ATTEMP ,SENDER ,RESEND_API, FROM_EMAIL
 import json
+import base64
 
 month = {
         "January":"มกราคม", 
@@ -38,6 +39,7 @@ class send_email():
         self.call_back = None
         self.complete = False
         self.index = 0
+        resend.api_key = RESEND_API
     
     def progress(self,index=None,current=None,branch=None):
         if self.call_back:
@@ -77,56 +79,45 @@ class send_email():
         return msg
 
     def msg_production_gen(self,person):  
-        msg = MIMEMultipart()
-        msg['From'] = FROM_EMAIL
-        msg['To'] = person['email']
-        msg['subject'] = f'สลิปเงินเดือนของ {person["employee_name"]}'
-        msg['Date'] = formatdate(localtime=True)
-        
-        body = f"""
-                เรียนคุณ {person['employee_name']} 
-        นี่คือใบเเจ้งเงินเดือนประจำเดือน {person['pay_period']} หากมีปัญหาหรือขอผิดพลาดประการใดกรุณาติดต่อผู้ดูเเล"""
-
-        # msg.attach(MIMEText(body)) bug
-        # msg.attach(MIMEText('<img src="cid:image1" width="1000" height="772">', 'html'))
-        
         with open(person['html_email_path'], "r", encoding="utf-8") as f:
             html_content = f.read()
 
-        
-        msg.attach(MIMEText(html_content,'html'))
-
         with open(person["pdf_path"],'rb') as f:   
-            attach = MIMEApplication(f.read(),_subtype="pdf")
-        attach.add_header('Content-Disposition','attachment',filename=f"เงินเดือนของ {person['employee_name']} ประจำเดือน {person['pay_period']}.pdf")
-        msg.attach(attach)
-        return msg
+            attach = f.read()
+
+        params: resend.Emails.SendParams = {
+                "from": f"{FROM_EMAIL} <{SENDER}>",
+                "to": [person['email']],
+                "subject":  f'สลิปเงินเดือนของ {person["employee_name"]}',
+                "html": html_content,
+                "attachments":[{
+                   "filename":f"เงินเดือนของ {person['employee_name']} ประจำเดือน {person['pay_period']}.pdf",
+                   "content":base64.b64encode(attach).decode()
+                }]
+        }
+        return params
 
     def send_emails(self,person,length):
             self.index += 1
-            if person['email'] == "-" or person['email'] == 0:
+            if person['email'] == "-" or person['email'] == 0 or person['email'] == "":
                 return
-            context = ssl.create_default_context()
-            with smtplib.SMTP_SSL('smtp.gmail.com',465,context = context) as smtp:
-                smtp.login(SENDER,PASSWORD)            
-                msg = self.msg_production_gen(person)
-                success = False
-                attemp = 0
-                while not success and attemp < EMAIL_ATTEMP:
-                    attemp += 1
-                    try:
-                        smtp.sendmail(SENDER,person['email'],msg.as_string())
-                        success = True
-                    except Exception as e:
-                        print(f"Fail to send mail to {person['employee_name']} | {person['email']} trying {attemp}/{EMAIL_ATTEMP} due to {e}")
-                        time.sleep(0.4)
+            params = self.msg_production_gen(person)
+            success = False
+            attemp = 0
+            while not success and attemp < EMAIL_ATTEMP:
+                attemp += 1
+                try:
+                    email = resend.Emails.send(params)
+                    success = True
+                except Exception as e:
+                    print(f"Fail to send mail to {person['employee_name']} | {person['email']} trying {attemp}/{EMAIL_ATTEMP} due to {e}")
+                    time.sleep(0.4)
 
-                self.progress(self.index,person['employee_name'],person['branch'])
-                if not success:
-                    print(f"Unable to send mail to {person['employee_name']} | {person['email']}")
-                    return
-                smtp.quit()
-                print(f'Mail has send to {person["employee_name"]} | {person["email"]} {self.index}/{length}')
+            self.progress(self.index,person['employee_name'],person['branch'])
+            if not success:
+                print(f"Unable to send mail to {person['employee_name']} | {person['email']}")
+                return
+            print(f'Mail has send to {person["employee_name"]} | {person["email"]} {self.index}/{length}')
             
             person['mail_sent'] = True
             with open(person["meta_data_path"],'w',encoding="utf-8") as f:

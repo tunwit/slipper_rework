@@ -70,23 +70,37 @@ class excel():
         dfs = pd.read_excel(self.path,header=1,sheet_name=None)
         return self.clean_sheet(dfs)
     
-    def clean_sheet(self,dfs:dict):
+    def clean_sheet(self, dfs: dict):
         to_pop = [df for df in dfs if not df.startswith("D")]
         for b in to_pop:
             dfs.pop(b)
-        
+
         cleaned_dfs = {}
+
         for sheet_name, df in dfs.items():
-            print(df.columns)
             df.columns.values[0] = "รหัสพนักงาน"
+
             if "รหัสพนักงาน" in df.columns and "ชื่อ-นามสกุล" in df.columns:
-                new_name = sheet_name.replace("D", "", 1).replace(" ","")  # remove only the first "D" and remove space
-                cleaned_dfs[new_name] = df.dropna(subset=["รหัสพนักงาน", "ชื่อ-นามสกุล"], how="any")
-                first_col = cleaned_dfs[new_name].columns[0]
-                cleaned_dfs[new_name][first_col] = cleaned_dfs[new_name][first_col].astype(pd.Int64Dtype()).astype(str)
-                cleaned_dfs[new_name].fillna(0, inplace=True)
-        
-       
+                new_name = sheet_name.replace("D", "", 1).replace(" ", "")
+                # drop
+                df_clean = df.dropna(subset=["รหัสพนักงาน", "ชื่อ-นามสกุล"], how="any").copy()
+
+                # --- FIX 1: แปลงรหัสพนักงานให้ safe ---
+                first_col = df_clean.columns[0]
+                col = pd.to_numeric(df_clean[first_col], errors='coerce').astype('Int64')
+                df_clean[first_col] = col.astype(str)  # ถ้าต้องการเป็น string
+
+                # --- FIX 2: normalize dtype ทั้ง dataframe ---
+                df_clean = df_clean.convert_dtypes()
+
+                # --- FIX 3: fillna แบบแยก dtype ---
+                num_cols = df_clean.select_dtypes(include='number').columns
+                str_cols = df_clean.select_dtypes(include=['string', 'object']).columns
+
+                df_clean[num_cols] = df_clean[num_cols].fillna(0)
+                df_clean[str_cols] = df_clean[str_cols].fillna("")
+
+                cleaned_dfs[new_name] = df_clean
 
         return cleaned_dfs
     
